@@ -25,7 +25,7 @@ namespace Test.Tool.Analyzers
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("a");
             XAssert.IsTrue(id.Equals(id2));
-            XAssert.IsTrue("a" == stringTable[id]);
+            XAssert.AreEqual("a", stringTable[id]);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Test.Tool.Analyzers
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("b");
             XAssert.IsFalse(id.Equals(id2));
-            XAssert.IsTrue("b" == stringTable[id2]);
+            XAssert.AreEqual("b", stringTable[id2]);
         }
     }
 }

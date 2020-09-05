@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using BuildXL.Storage.Fingerprints;
 using BuildXL.Utilities;
 
@@ -60,6 +62,63 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             Separator = separator;
             StringTable = stringTable;
+        }
+
+        /// <summary>
+        /// Length in characters of the given name.
+        /// </summary>
+        public int Length(NameId id)
+        {
+            int len = 0;
+            NameEntry entry = this[id];
+            bool atEnd;
+            do
+            {
+                atEnd = entry.Prefix.Equals(default(StringId));
+                len += StringTable[entry.Atom].Length + (atEnd ? 0 : 1);
+            }
+            while (!atEnd);
+            return len;
+        }
+
+        /// <summary>
+        /// Get the full text of the given name, writing into the given span, returning the prefix of the span
+        /// containing the full name.
+        /// </summary>
+        /// <remarks>
+        /// Use this in hot paths when string allocation is undesirable.
+        /// </remarks>
+        public ReadOnlySpan<char> GetText(NameId nameId, Span<char> span)
+        {
+            NameEntry entry = this[nameId];
+            ReadOnlySpan<char> prefixSpan;
+            if (!entry.Prefix.Equals(default(NameId)))
+            {
+                prefixSpan = GetText(entry.Prefix, span);
+                span[prefixSpan.Length] = Separator;
+                prefixSpan = span.Slice(0, prefixSpan.Length + 1);
+            }
+            else
+            {
+                prefixSpan = span.Slice(0, 0);
+            }
+            string atom = StringTable[entry.Atom];
+            atom.AsSpan().CopyTo(span.Slice(prefixSpan.Length));
+            return span.Slice(0, prefixSpan.Length + atom.Length);
+        }
+
+        /// <summary>
+        /// Get the full text of the given name, allocating a new string for it.
+        /// </summary>
+        /// <remarks>
+        /// This allocates not only a string but a StringBuilder; do not use in hot paths.
+        /// </remarks>
+        public string GetText(NameId nameId, int capacity = 1000)
+        {
+            char[] buf = new char[capacity];
+            Span<char> span = new Span<char>(buf);
+            ReadOnlySpan<char> textSpan = GetText(nameId, span);
+            return new string(textSpan);
         }
 
         public new class Builder : BaseTable<NameId, NameEntry>.Builder
