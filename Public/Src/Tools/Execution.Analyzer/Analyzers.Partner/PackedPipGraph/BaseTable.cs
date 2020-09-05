@@ -31,7 +31,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Build a BaseTable, by creating a dictionary of items already added.
         /// </summary>
-        public class CachingBuilder
+        public class Builder
         {
             /// <summary>
             /// Efficient lookup by string value.
@@ -39,32 +39,32 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             /// <remarks>
             /// This is really only necessary when building the table, and should probably be split out into a builder type.
             /// </remarks>
-            private readonly Dictionary<TValue, TId> m_entries = new Dictionary<TValue, TId>();
+            protected readonly Dictionary<TValue, TId> Entries = new Dictionary<TValue, TId>();
 
-            private readonly BaseTable<TId, TValue> m_baseTable;
+            protected readonly BaseTable<TId, TValue> BaseTable;
 
-            internal CachingBuilder(BaseTable<TId, TValue> baseTable)
+            internal Builder(BaseTable<TId, TValue> baseTable)
             {
-                m_baseTable = baseTable;
+                BaseTable = baseTable;
                 // always skip the zero element
                 for (int i = 1; i < baseTable.m_values.Count; i++)
                 {
-                    m_entries.Add(baseTable.m_values[i], default(TId).ToId(i));
+                    Entries.Add(baseTable.m_values[i], default(TId).ToId(i));
                 }
             }
 
             public TId GetOrAdd(TValue value)
             {
-                if (m_entries.TryGetValue(value, out TId id))
+                if (Entries.TryGetValue(value, out TId id))
                 {
                     return id;
                 }
                 else
                 {
                     // bit of an odd creation idiom, but should be zero-allocation and no-virtcall
-                    id = default(TId).ToId(m_baseTable.m_values.Count);
-                    m_baseTable.m_values.Add(value);
-                    m_entries.Add(value, id);
+                    id = default(TId).ToId(BaseTable.m_values.Count);
+                    BaseTable.m_values.Add(value);
+                    Entries.Add(value, id);
                     return id;
                 }
             }

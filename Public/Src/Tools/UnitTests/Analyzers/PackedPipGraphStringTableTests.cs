@@ -20,11 +20,11 @@ namespace Test.Tool.Analyzers
         {
             StringTable stringTable = new StringTable();
 
-            StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
+            StringTable.Builder builder = new StringTable.Builder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("a");
-            XAssert.IsTrue(id == id2);
+            XAssert.IsTrue(id.Equals(id2));
             XAssert.IsTrue("a" == stringTable[id]);
         }
 
@@ -33,11 +33,11 @@ namespace Test.Tool.Analyzers
         {
             StringTable stringTable = new StringTable();
 
-            StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
+            StringTable.Builder builder = new StringTable.Builder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("b");
-            XAssert.IsTrue(id != id2);
+            XAssert.IsFalse(id.Equals(id2));
             XAssert.IsTrue("b" == stringTable[id2]);
         }
     }
