@@ -43,7 +43,7 @@ namespace Test.Tool.Analyzers
             };
         }
 
-        [Fact]
+        //[Fact]
         public void SourceFileWeakFingerprintMiss()
         {
             FileArtifact srcFile = CreateSourceFile();
@@ -68,7 +68,7 @@ namespace Test.Tool.Analyzers
                 ArtifactToString(srcFile));
         }
 
-        [Fact]
+        //[Fact]
         public void DirectoryEnumerationReadOnlyMountStrongFingerprintMiss()
         {
             DirectoryArtifact dir = DirectoryArtifact.CreateWithZeroPartialSealId(CreateUniqueDirectory(ReadonlyRoot));
@@ -105,7 +105,7 @@ namespace Test.Tool.Analyzers
                 ArtifactToString(addedFile));
         }
 
-        [Fact]
+        //[Fact]
         public void NonCacheableAllowelistPipMiss()
         {
             FileArtifact allowlistFile = CreateSourceFile();
@@ -131,7 +131,7 @@ namespace Test.Tool.Analyzers
                 "disallowed file accesses in the previous build");
         }
 
-        [Fact]
+        //[Fact]
         public void FileAccessViolationUncacheablePipMiss()
         {
             Configuration.Sandbox.UnsafeSandboxConfigurationMutable.UnexpectedFileAccessesAreErrors = false;
@@ -161,7 +161,7 @@ namespace Test.Tool.Analyzers
         /// This prevents analysis of any downstream pips, even if they
         /// had a cache miss cause other than the upstream pip being executed.
         /// </note>
-        [Fact]
+        //[Fact]
         public void TestAllPipsOption()
         {
             FileArtifact srcA = CreateSourceFile();
@@ -246,7 +246,7 @@ namespace Test.Tool.Analyzers
                 "No fingerprint computation data found to compare");
         }
 
-        [Fact]
+        //[Fact]
         public void FilterSkippedPipNoFingerprint()
         {
             FileArtifact src = CreateSourceFile();

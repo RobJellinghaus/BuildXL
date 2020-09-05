@@ -46,7 +46,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             internal CachingBuilder(BaseTable<TId, TValue> baseTable)
             {
                 m_baseTable = baseTable;
-                for (int i = 0; i < baseTable.m_values.Count; i++)
+                // always skip the zero element
+                for (int i = 1; i < baseTable.m_values.Count; i++)
                 {
                     m_entries.Add(baseTable.m_values[i], default(TId).ToId(i));
                 }

@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Security.Cryptography;
+using BuildXL.Execution.Analyzer.JPath;
+using Google.Protobuf.WellKnownTypes;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -16,6 +18,16 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         internal StringId(int value) { Value = value; }
         int Id<StringId>.FromId() => Value;
         StringId Id<StringId>.ToId(int value) => new StringId(value);
+
+        public static bool operator==(StringId left, StringId right)
+        {
+            return left.Value == right.Value;
+        }
+
+        public static bool operator!=(StringId left, StringId right)
+        {
+            return !(left == right);
+        }
     }
 
     /// <summary>
