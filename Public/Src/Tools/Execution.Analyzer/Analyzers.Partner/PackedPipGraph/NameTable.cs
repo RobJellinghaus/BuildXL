@@ -77,11 +77,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             while (!atEnd)
             {
                 entry = this[id];
-                Console.WriteLine($"Got entry {entry.Prefix},{entry.Atom}");
                 if (entry.Atom.Equals(default)) { throw new Exception($"Invalid atom for id {entry.Atom}"); }
 
                 atEnd = entry.Prefix.Equals(default);
-                Console.WriteLine($"At end: {atEnd}");
 
                 len += StringTable[entry.Atom].Length;
 
