@@ -20,10 +20,16 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     {
         public readonly TBaseTable BaseTable;
 
+        protected readonly SpannableList<TValue> Values;
+
         public DerivedTable(TBaseTable baseTable)
         {
             BaseTable = baseTable;
+            Values = new SpannableList<TValue>(Count + 1);
+            Values.Add(default);
         }
+
+        protected override IList<TValue> GetValues() => Values;
 
         public override int Count => BaseTable.Count;
 
@@ -48,6 +54,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             Values[id.FromId()] = value;
         }
 
+        /// <summary>
+        /// Ensure this table stores at least as many elements as the base table.
+        /// </summary>
         private void EnsureCount()
         {
             // The +1 here is to account for the mandatory initial zero entry in all tables; this method commingles
@@ -61,13 +70,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         public override void SaveToFile(string directory, string name)
         {
-            FileSpanUtilities.SaveToFile<TValue>(directory, name, Values);
+            FileSpanUtilities.SaveToFile(directory, name, Values);
         }
 
         public override void LoadFromFile(string directory, string name)
         {
-            Values.Clear();
-            Values.AddRange(FileSpanUtilities.LoadFromFile<TValue>(directory, name));
+            FileSpanUtilities.LoadFromFile(directory, name, Values);
         }
     }
 }

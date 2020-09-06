@@ -1,21 +1,42 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
     /// <summary>
-    /// A BaseTable with values restricted to unmanaged types.
+    /// Defines a new ID space and set of base values for each ID, where the values are unmanaged.
     /// </summary>
     /// <remarks>
-    /// This lets us safely write generic span-based save and load methods for the contents.
+    /// This serves as the "core data" of the entity with the given ID.
+    /// Other derived tables and relations can be built sharing the same base table.
+    /// 
+    /// ID 0 is always preallocated and always has the default TValue; this lets us
+    /// distinguish uninitialized IDs from allocated IDs, and gives us a default
+    /// sentinel value in every table.
     /// </remarks>
-    public abstract class BaseUnmanagedTable<TId, TValue> : BaseTable<TId, TValue>
+    public abstract class BaseUnmanagedTable<TId, TValue> : ValueTable<TId, TValue>
         where TId : struct, Id<TId>
         where TValue : unmanaged
     {
-        public BaseUnmanagedTable(int capacity = -1) : base(capacity)
+        /// <summary>
+        /// List of values; index in list = ID of value.
+        /// </summary>
+        protected readonly SpannableList<TValue> Values; 
+
+        public BaseUnmanagedTable(int capacity = DefaultCapacity)
         {
+            if (capacity <= 0) { throw new ArgumentException($"Capacity {capacity} must be > 0"); }
+            Values = new SpannableList<TValue>(capacity + 1);
+            // The 0'th entry is always preallocated, so we can use it as a sentinel in any table.
+            // In other words: 0 is never a valid backing value for any TId.
+            Values.Add(default);
         }
+
+        protected override IList<TValue> GetValues() => Values;
 
         public override void SaveToFile(string directory, string name)
         {
@@ -24,8 +45,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         public override void LoadFromFile(string directory, string name)
         {
-            Values.Clear();
-            Values.AddRange(FileSpanUtilities.LoadFromFile<TValue>(directory, name));
+            FileSpanUtilities.LoadFromFile(directory, name, Values);
         }
     }
 }

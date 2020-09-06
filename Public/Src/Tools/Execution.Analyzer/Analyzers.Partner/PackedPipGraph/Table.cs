@@ -30,6 +30,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
         }
 
+        protected const int DefaultCapacity = 100;
+
         /// <summary>
         /// The IDs stored in this Table.
         /// </summary>

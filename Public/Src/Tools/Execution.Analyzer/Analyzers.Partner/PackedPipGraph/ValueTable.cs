@@ -23,18 +23,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// List of values; index in list = ID of value.
         /// </summary>
-        protected readonly List<TValue> Values; 
+        protected abstract IList<TValue> GetValues(); 
 
-        public ValueTable(int capacity = -1)
-        {
-            Values = new List<TValue>(capacity == -1 ? 100 : capacity + 1);
-
-            // The 0'th entry is always preallocated, so we can use it as a sentinel in any table.
-            // In other words: 0 is never a valid backing value for any TId.
-            Values.Add(default(TValue));
-        }
-
-        public override int Count => Values.Count - 1;
+        public override int Count => GetValues().Count - 1;
 
         /// <summary>
         /// Return the current range of defined IDs.
@@ -43,13 +34,57 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// Mainly useful for testing.
         /// </remarks>
         public override IEnumerable<TId> Ids =>
-            Values.Count == 1 
+            GetValues().Count == 1 
                 ? Enumerable.Empty<TId>() 
-                : Enumerable.Range(1, Values.Count - 1).Select(v => default(TId).ToId(v));
+                : Enumerable.Range(1, GetValues().Count - 1).Select(v => default(TId).ToId(v));
 
         /// <summary>
         /// Get a value from the table.
         /// </summary>
-        public virtual TValue this[TId id] => Values[id.FromId()];
+        public virtual TValue this[TId id] => GetValues()[id.FromId()];
+
+        /// <summary>
+        /// Build a BaseTable, by creating a dictionary of items already added.
+        /// </summary>
+        public class CachingBuilder<TValueComparer>
+            where TValueComparer : IEqualityComparer<TValue>, new()
+        {
+            /// <summary>
+            /// Efficient lookup by hash value.
+            /// </summary>
+            /// <remarks>
+            /// This is really only necessary when building the table, and should probably be split out into a builder type.
+            /// </remarks>
+            protected readonly Dictionary<TValue, TId> Entries = new Dictionary<TValue, TId>(new TValueComparer());
+
+            protected readonly ValueTable<TId, TValue> ValueTable;
+
+            internal CachingBuilder(ValueTable<TId, TValue> valueTable)
+            {
+                ValueTable = valueTable;
+                // always skip the zero element
+                IList<TValue> values = valueTable.GetValues();
+                for (int i = 1; i < values.Count; i++)
+                {
+                    Entries.Add(values[i], default(TId).ToId(i));
+                }
+            }
+
+            public virtual TId GetOrAdd(TValue value)
+            {
+                if (Entries.TryGetValue(value, out TId id))
+                {
+                    return id;
+                }
+                else
+                {
+                    // bit of an odd creation idiom, but should be zero-allocation and no-virtcall
+                    id = default(TId).ToId(ValueTable.GetValues().Count);
+                    ValueTable.GetValues().Add(value);
+                    Entries.Add(value, id);
+                    return id;
+                }
+            }
+        }
     }
 }

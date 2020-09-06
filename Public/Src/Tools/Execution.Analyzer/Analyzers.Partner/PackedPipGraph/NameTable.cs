@@ -156,7 +156,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 StringTableBuilder = stringTableBuilder;
             }
 
-            private NameTable NameTable => (NameTable)BaseTable;
+            private NameTable NameTable => (NameTable)ValueTable;
             public readonly StringTable.CachingBuilder StringTableBuilder;
 
             /// <summary>

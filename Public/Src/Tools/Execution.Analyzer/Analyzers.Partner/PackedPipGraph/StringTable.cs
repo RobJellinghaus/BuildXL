@@ -36,10 +36,10 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class StringTable : BaseTable<StringId, string>
     {
-        public StringTable(int capacity = -1) : base(capacity)
+        public StringTable(int capacity = DefaultCapacity) : base(capacity)
         {
             // zeroth entry is the empty string; works better with saving/loading than null
-            Values[0] = "";
+            Values.Add("");
         }
 
         public override void SaveToFile(string directory, string name)

@@ -49,7 +49,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public readonly NameTable FileNameTable;
 
-        public FileTable(StringTable stringTable, int capacity = -1) : base(capacity)
+        public FileTable(StringTable stringTable, int capacity = DefaultCapacity) : base(capacity)
         {
             FileNameTable = new NameTable('\\', stringTable);
         }

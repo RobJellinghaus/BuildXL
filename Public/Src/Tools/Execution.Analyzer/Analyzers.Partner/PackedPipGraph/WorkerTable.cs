@@ -36,7 +36,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public readonly StringTable StringTable;
 
-        public WorkerTable(StringTable stringTable, int capacity = -1) : base(capacity)
+        public WorkerTable(StringTable stringTable, int capacity = DefaultCapacity) : base(capacity)
         {
             StringTable = stringTable;
         }
