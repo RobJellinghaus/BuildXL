@@ -60,5 +60,35 @@ namespace Test.Tool.Analyzers
 
             XAssert.AreEqual(path, pipGraph.FileTable.FileNameTable.GetText(pipGraph.FileTable[id].Name));
         }
+
+        [Fact]
+        public void PackedPipGraph_can_save_and_load()
+        {
+            PackedPipGraph pipGraph = new PackedPipGraph();
+            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+
+            string path = "d:\\os\\bin\\shellcommon\\shell\\merged\\winmetadata\\appresolverux.winmd";
+            pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024);
+            string hash = "PipHash";
+            string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
+            pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
+
+            XAssert.AreEqual(1, pipGraph.PipTable.Count);
+            XAssert.AreEqual(1, pipGraph.FileTable.Count);
+            XAssert.AreEqual(13, pipGraph.StringTable.Count);
+
+            pipGraph.SaveToDirectory(TemporaryDirectory);
+
+            PackedPipGraph pipGraph2 = new PackedPipGraph();
+            pipGraph2.LoadFromDirectory(TemporaryDirectory);
+
+            XAssert.AreEqual(1, pipGraph2.PipTable.Count);
+            XAssert.AreEqual(1, pipGraph2.FileTable.Count);
+            XAssert.AreEqual(13, pipGraph2.StringTable.Count);
+            FileId fileId = pipGraph2.FileTable.Ids.First();
+            XAssert.AreEqual(path, pipGraph2.FileTable.FileNameTable.GetText(pipGraph2.FileTable[fileId].Name));
+            PipId pipId = pipGraph2.PipTable.Ids.First();
+            XAssert.AreEqual(name, pipGraph2.PipTable.PipNameTable.GetText(pipGraph2.PipTable[pipId].Name));
+        }
     }
 }
