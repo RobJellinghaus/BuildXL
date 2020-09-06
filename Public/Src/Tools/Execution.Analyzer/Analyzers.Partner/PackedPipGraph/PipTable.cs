@@ -44,12 +44,30 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </summary>
     public class PipTable : BaseTable<PipId, PipEntry>
     {
-        public PipTable()
+        public readonly NameTable PipNameTable;
+
+        public PipTable(StringTable stringTable)
         {
+            PipNameTable = new NameTable('.', stringTable);
         }
+
         public class CachingBuilder : CachingBuilder<PipEntry.EqualityComparer>
         {
-            public CachingBuilder(PipTable table) : base(table) { }
+            public readonly NameTable.Builder NameTableBuilder;
+
+            public CachingBuilder(PipTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
+            {
+                NameTableBuilder = new NameTable.Builder(table.PipNameTable, stringTableBuilder);
+            }
+
+            public PipId GetOrAdd(string hash, string pipName, TimeSpan executionTime)
+            {
+                PipEntry entry = new PipEntry(
+                    NameTableBuilder.StringTableBuilder.GetOrAdd(hash),
+                    NameTableBuilder.GetOrAdd(pipName),
+                    executionTime);
+                return GetOrAdd(entry);
+            }
         }
     }
 }

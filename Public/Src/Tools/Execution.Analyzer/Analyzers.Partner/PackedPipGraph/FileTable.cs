@@ -44,13 +44,29 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class FileTable : BaseTable<FileId, FileEntry>
     {
-        public FileTable()
+        public readonly NameTable FileNameTable;
+
+        public FileTable(StringTable stringTable)
         {
+            FileNameTable = new NameTable('\\', stringTable);
         }
 
         public class CachingBuilder : CachingBuilder<FileEntry.EqualityComparer>
         {
-            public CachingBuilder(FileTable table) : base(table) { }
+            public readonly NameTable.Builder NameTableBuilder;
+
+            public CachingBuilder(FileTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
+            {
+                NameTableBuilder = new NameTable.Builder(table.FileNameTable, stringTableBuilder);
+            }
+
+            public FileId GetOrAdd(string filePath, long sizeInBytes)
+            {
+                FileEntry entry = new FileEntry(
+                    NameTableBuilder.GetOrAdd(filePath),
+                    sizeInBytes);
+                return GetOrAdd(entry);
+            }
         }
     }
 }

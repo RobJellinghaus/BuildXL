@@ -141,11 +141,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             public Builder(NameTable table, StringTable.CachingBuilder stringTableBuilder) : base(table) 
             {
-                m_stringTableBuilder = stringTableBuilder;
+                StringTableBuilder = stringTableBuilder;
             }
 
             private NameTable NameTable => (NameTable)BaseTable;
-            private readonly StringTable.CachingBuilder m_stringTableBuilder;
+            public readonly StringTable.CachingBuilder StringTableBuilder;
 
             /// <summary>
             /// Split this string into its constituent pieces and ensure it exists as a Name.
@@ -161,7 +161,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 NameId prefixId = default;
                 foreach (string p in pieces)
                 {
-                    StringId atomId = m_stringTableBuilder.GetOrAdd(p);
+                    StringId atomId = StringTableBuilder.GetOrAdd(p);
                     // if this prefix/atom pair already exists, we will get the ID of the current version,
                     // hence sharing it. Otherwise, we'll make a new entry and get a new ID for it.
                     // Either way, we'll then iterate, using the ID (current or new) as the prefix for
