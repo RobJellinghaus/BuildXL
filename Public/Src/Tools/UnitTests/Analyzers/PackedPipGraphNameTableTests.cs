@@ -30,6 +30,7 @@ namespace Test.Tool.Analyzers
 
             NameId id = nameTableBuilder.GetOrAdd("a");
             NameId id2 = nameTableBuilder.GetOrAdd("a");
+
             XAssert.IsTrue(id.Equals(id2));
             XAssert.AreEqual("a", nameTable.GetText(id));
             XAssert.AreEqual(1, nameTable.Length(id));
@@ -48,6 +49,7 @@ namespace Test.Tool.Analyzers
 
             NameId id = nameTableBuilder.GetOrAdd("a");
             NameId id2 = nameTableBuilder.GetOrAdd("b");
+
             XAssert.IsFalse(id.Equals(id2));
             XAssert.AreEqual("b", nameTable.GetText(id2));
             XAssert.AreEqual(1, nameTable.Length(id2));
@@ -66,11 +68,33 @@ namespace Test.Tool.Analyzers
 
             NameId id = nameTableBuilder.GetOrAdd("a.b");
             NameId id2 = nameTableBuilder.GetOrAdd("a.b");
+
             XAssert.IsTrue(id.Equals(id2));
             XAssert.AreEqual("a.b", nameTable.GetText(id));
             XAssert.AreEqual(3, nameTable.Length(id));
             XAssert.AreEqual(2, nameTable.Count());
             XAssert.AreEqual(2, nameTable.Ids.Count());
+        }
+
+        [Fact]
+        public void NameTable_can_store_two_complex_elements()
+        {
+            StringTable stringTable = new StringTable();
+            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+
+            NameTable nameTable = new NameTable('.', stringTable);
+            NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
+
+            NameId id = nameTableBuilder.GetOrAdd("a.b");
+            NameId id2 = nameTableBuilder.GetOrAdd("a.ccc");
+
+            XAssert.IsFalse(id.Equals(id2));
+            XAssert.AreEqual("a.b", nameTable.GetText(id));
+            XAssert.AreEqual(3, nameTable.Length(id));
+            XAssert.AreEqual("a.ccc", nameTable.GetText(id2));
+            XAssert.AreEqual(5, nameTable.Length(id2));
+            XAssert.AreEqual(3, nameTable.Count());
+            XAssert.AreEqual(3, nameTable.Ids.Count());
         }
 
     }

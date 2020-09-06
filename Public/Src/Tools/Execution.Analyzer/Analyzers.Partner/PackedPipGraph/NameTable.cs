@@ -157,8 +157,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 foreach (string p in pieces)
                 {
                     StringId atomId = m_stringTableBuilder.GetOrAdd(p);
+                    // if this prefix/atom pair already exists, we will get the ID of the current version,
+                    // hence sharing it. Otherwise, we'll make a new entry and get a new ID for it.
+                    // Either way, we'll then iterate, using the ID (current or new) as the prefix for
+                    // the next piece.
                     prefixId = GetOrAdd(new NameEntry(prefixId, atomId));
                 }
+                // The ID we wind up with is the ID of the entire name.
                 return prefixId;
             }
         }
