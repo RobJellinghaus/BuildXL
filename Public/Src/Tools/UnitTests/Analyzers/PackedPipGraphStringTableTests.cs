@@ -20,7 +20,6 @@ namespace Test.Tool.Analyzers
         public void StringTable_can_store_one_element()
         {
             StringTable stringTable = new StringTable();
-
             StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
@@ -36,7 +35,6 @@ namespace Test.Tool.Analyzers
         public void StringTable_can_store_two_elements()
         {
             StringTable stringTable = new StringTable();
-
             StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
@@ -45,6 +43,27 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual("b", stringTable[id2]);
             XAssert.AreEqual(2, stringTable.Count);
             XAssert.AreEqual(2, stringTable.Ids.Count());
+        }
+
+        [Fact]
+        public void StringTable_can_save_and_load()
+        {
+            StringTable stringTable = new StringTable();
+            StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
+
+            builder.GetOrAdd("a");
+            builder.GetOrAdd("b");
+
+            stringTable.SaveToFile(TemporaryDirectory, "stringtable.txt");
+
+            StringTable stringTable2 = new StringTable();
+            stringTable2.LoadFromFile(TemporaryDirectory, "stringtable.txt");
+
+            XAssert.AreEqual(stringTable.Count, stringTable2.Count);
+            foreach (StringId id in stringTable.Ids)
+            {
+                XAssert.AreEqual(stringTable[id], stringTable2[id]);
+            }
         }
     }
 }
