@@ -70,9 +70,22 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             }
         }
 
-        public override IEnumerable<TId> Ids => 
-            Enumerable.Range(1, m_values.Count).Select(v => default(TId).ToId(v));
+        public int Count() => m_values.Count - 1;
 
+        /// <summary>
+        /// Return the current range of defined IDs.
+        /// </summary>
+        /// <remarks>
+        /// Mainly useful for testing.
+        /// </remarks>
+        public override IEnumerable<TId> Ids =>
+            m_values.Count == 1 
+                ? Enumerable.Empty<TId>() 
+                : Enumerable.Range(1, m_values.Count - 1).Select(v => default(TId).ToId(v));
+
+        /// <summary>
+        /// Get a value from the table.
+        /// </summary>
         public TValue this[TId id] => m_values[id.FromId()];
     }
 }
