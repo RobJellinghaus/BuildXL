@@ -78,7 +78,6 @@ namespace Test.Tool.Analyzers
             list.Insert(0, 2);
             XAssert.AreEqual(2, list.Count);
             XAssert.AreEqual(2, list.Count());
-            Console.WriteLine($"List: {list.ToFullString()}");
             XAssert.IsTrue(list.Contains(1));
             XAssert.IsTrue(list.Contains(2));
             XAssert.IsFalse(list.Contains(3));
@@ -87,6 +86,44 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual(2, list.AsSpan().Length);
             XAssert.AreEqual(2, list.AsSpan()[0]);
             XAssert.AreEqual(1, list.AsSpan()[1]);
+
+            list.Insert(2, 3);
+            XAssert.AreEqual(3, list.Count);
+            XAssert.AreEqual(3, list.Count());
+            XAssert.IsTrue(list.Contains(1));
+            XAssert.IsTrue(list.Contains(2));
+            XAssert.IsTrue(list.Contains(3));
+            XAssert.AreEqual(1, list.IndexOf(1));
+            XAssert.AreEqual(0, list.IndexOf(2));
+            XAssert.AreEqual(2, list.IndexOf(3));
+            XAssert.AreEqual(3, list.AsSpan().Length);
+            XAssert.AreArraysEqual(new[] { 2, 1, 3 }, list.ToArray(), true);
+        }
+
+        [Fact]
+        public void SpannableList_can_be_removed()
+        {
+            SpannableList<int> list = new SpannableList<int>(1);
+
+            list.Add(1);
+            list.Add(2);
+            list.Add(3);
+
+            XAssert.AreArraysEqual(new[] { 1, 2, 3 }, list.ToArray(), true);
+
+            list.RemoveAt(0);
+
+            XAssert.AreEqual(2, list.Count);
+            XAssert.AreArraysEqual(new[] { 2, 3 }, list.ToArray(), true);
+
+            list.RemoveAt(1);
+
+            XAssert.AreEqual(1, list.Count);
+            XAssert.AreArraysEqual(new[] { 2 }, list.ToArray(), true);
+
+            XAssert.IsFalse(list.Remove(1));
+            XAssert.IsTrue(list.Remove(2));
+            XAssert.AreEqual(0, list.Count);
         }
     }
 }
