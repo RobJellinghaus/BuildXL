@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using BuildXL.Utilities.Configuration.Mutable;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {

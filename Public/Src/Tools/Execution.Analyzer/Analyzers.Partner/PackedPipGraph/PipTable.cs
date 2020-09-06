@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
-using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -44,6 +41,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </summary>
     public class PipTable : BaseUnmanagedTable<PipId, PipEntry>
     {
+        /// <summary>
+        /// The names of pips in this table.
+        /// </summary>
+        /// <remarks>
+        /// This sub-table is owned by this PipTable; the PipTable constructs it, and saves and loads it.
+        /// </remarks>
         public readonly NameTable PipNameTable;
 
         public PipTable(StringTable stringTable, int capacity = -1) : base(capacity)

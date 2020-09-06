@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Runtime.InteropServices;
 using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
@@ -44,18 +42,32 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <summary>
     /// Suffix table representation of sequential names, such as pip names or file paths.
     /// </summary>
+    /// <remarks>
+    /// This representation shares all sub-names as much as possible. For example, for a NameTable with
+    /// period delimiters that is initially empty:
+    /// 
+    /// - Storing the name "a.b.c" will result in three names in the table: "a", "a.b", and "a.b.c".
+    /// - Each name is represented by a pointer to its prefix, and the atom at the end.
+    /// - If we then store "a.b.d", only one additional name will be added, because the prefix "a.b" will be shared.
+    /// 
+    /// The intent is to optimize the representation of long, sequential names which have many repeated subparts.
+    /// Both file paths and pip names fit this description, and this type is used for both.
+    /// </remarks>
     public class NameTable : BaseUnmanagedTable<NameId, NameEntry>
     {
         /// <summary>
         /// The separator between parts of names in this table.
         /// </summary>
         /// <remarks>
-        /// Typically either '.' or '\\'
+        /// Typically either '.' or '\\' or '/'
+        /// 
+        /// Note that this is not part of the persistent state of the table; this is provided at construction, and
+        /// the code doing the construction should know what type of separator is needed.
         /// </remarks>
         public readonly char Separator;
 
         /// <summary>
-        /// The backing string table used by names in this table.
+        /// The backing string table used by names in this table; not owned by this table, may be shared (and probably is).
         /// </summary>
         public readonly StringTable StringTable;
 

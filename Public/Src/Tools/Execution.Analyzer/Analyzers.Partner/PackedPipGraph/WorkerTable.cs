@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -25,12 +24,21 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// Tracks the workers in a build.
     /// </summary>
     /// <remarks>
-    /// The value is the worker's MachineName.
+    /// The StringId value is the worker's MachineName.
     /// </remarks>
     public class WorkerTable : BaseUnmanagedTable<WorkerId, StringId>
     {
-        public WorkerTable(int capacity = -1) : base(capacity)
+        /// <summary>
+        /// The table containing the strings referenced by this WorkerTable.
+        /// </summary>
+        /// <remarks>
+        /// The WorkerTable does not own this StringTable; it is probably shared.
+        /// </remarks>
+        public readonly StringTable StringTable;
+
+        public WorkerTable(StringTable stringTable, int capacity = -1) : base(capacity)
         {
+            StringTable = stringTable;
         }
 
         public class CachingBuilder : CachingBuilder<StringId>

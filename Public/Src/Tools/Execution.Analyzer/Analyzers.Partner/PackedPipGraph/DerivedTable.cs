@@ -53,11 +53,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             // The +1 here is to account for the mandatory initial zero entry in all tables; this method commingles
             // looking at the table count (which hides this entry) and looking at the local list count (which must take
             // that entry into account).
-            if (BaseTable.Count + 1 > Values.Capacity)
-            {
-                // grow a little ahead of the base table
-                Values.Capacity = (int)((BaseTable.Count + 1) * 1.2);
-            }
             if (BaseTable.Count + 1 > Values.Count)
             {
                 Values.AddRange(Enumerable.Repeat<TValue>(default, BaseTable.Count - Values.Count + 1));

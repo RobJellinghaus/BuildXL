@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -44,6 +41,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class FileTable : BaseUnmanagedTable<FileId, FileEntry>
     {
+        /// <summary>
+        /// The names of files in this FileTable.
+        /// </summary>
+        /// <remarks>
+        /// This sub-table is owned by this FileTable; the FileTable constructs it, and saves and loads it.
+        /// </remarks>
         public readonly NameTable FileNameTable;
 
         public FileTable(StringTable stringTable, int capacity = -1) : base(capacity)
@@ -72,6 +75,14 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 NameTableBuilder = new NameTable.Builder(table.FileNameTable, stringTableBuilder);
             }
 
+            /// <summary>
+            /// Get or add an entry for the given file path.
+            /// </summary>
+            /// <remarks>
+            /// If the entry already exists, the sizeInBytes value passed here will be ignored!
+            /// The only time that value can be set is when adding a new file not previously recorded.
+            /// TODO: consider failing if this happens?
+            /// </remarks>
             public FileId GetOrAdd(string filePath, long sizeInBytes)
             {
                 FileEntry entry = new FileEntry(
