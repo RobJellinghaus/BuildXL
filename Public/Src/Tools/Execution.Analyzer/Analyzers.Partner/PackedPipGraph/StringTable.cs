@@ -20,6 +20,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         StringId Id<StringId>.ToId(int value) => new StringId(value);
         public bool Equals(StringId other) => Value == other.Value;
         public override int GetHashCode() => Value;
+        public override string ToString() => $"StringId[{Value}]";
     }
 
     /// <summary>

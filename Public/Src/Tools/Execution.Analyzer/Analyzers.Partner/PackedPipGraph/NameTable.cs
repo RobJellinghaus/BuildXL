@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using BuildXL.Storage.Fingerprints;
@@ -21,6 +22,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         NameId Id<NameId>.ToId(int value) => new NameId(value);
         public bool Equals(NameId other) => Value == other.Value;
         public override int GetHashCode() => Value;
+        public override string ToString() => $"NameId[{Value}]";
     }
 
     /// <summary>
@@ -70,14 +72,27 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public int Length(NameId id)
         {
             int len = 0;
-            NameEntry entry = this[id];
-            bool atEnd;
-            do
+            bool atEnd = false;
+
+            NameEntry entry;
+            while (!atEnd)
             {
-                atEnd = entry.Prefix.Equals(default(StringId));
-                len += StringTable[entry.Atom].Length + (atEnd ? 0 : 1);
+                entry = this[id];
+                Console.WriteLine($"Got entry {entry.Prefix},{entry.Atom}");
+                if (entry.Atom.Equals(default)) { throw new Exception($"Invalid atom for id {entry.Atom}"); }
+
+                atEnd = entry.Prefix.Equals(default);
+                Console.WriteLine($"At end: {atEnd}");
+
+                len += StringTable[entry.Atom].Length;
+
+                if (!atEnd)
+                {
+                    len++;
+                    id = entry.Prefix;
+                }
             }
-            while (!atEnd);
+
             return len;
         }
 
