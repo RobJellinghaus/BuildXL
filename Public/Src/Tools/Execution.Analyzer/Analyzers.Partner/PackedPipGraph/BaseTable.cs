@@ -23,19 +23,20 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Build a BaseTable, by creating a dictionary of items already added.
         /// </summary>
-        public class Builder
+        public class CachingBuilder<TValueComparer>
+            where TValueComparer : IEqualityComparer<TValue>, new()
         {
             /// <summary>
-            /// Efficient lookup by string value.
+            /// Efficient lookup by hash value.
             /// </summary>
             /// <remarks>
             /// This is really only necessary when building the table, and should probably be split out into a builder type.
             /// </remarks>
-            protected readonly Dictionary<TValue, TId> Entries = new Dictionary<TValue, TId>();
+            protected readonly Dictionary<TValue, TId> Entries = new Dictionary<TValue, TId>(new TValueComparer());
 
             protected readonly BaseTable<TId, TValue> BaseTable;
 
-            internal Builder(BaseTable<TId, TValue> baseTable)
+            internal CachingBuilder(BaseTable<TId, TValue> baseTable)
             {
                 BaseTable = baseTable;
                 // always skip the zero element

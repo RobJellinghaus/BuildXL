@@ -21,7 +21,7 @@ namespace Test.Tool.Analyzers
         {
             StringTable stringTable = new StringTable();
 
-            StringTable.Builder builder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("a");
@@ -37,7 +37,7 @@ namespace Test.Tool.Analyzers
         {
             StringTable stringTable = new StringTable();
 
-            StringTable.Builder builder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("b");

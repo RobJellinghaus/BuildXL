@@ -20,7 +20,7 @@ namespace Test.Tool.Analyzers
         public void NameTable_can_store_one_singular_element()
         {
             StringTable stringTable = new StringTable();
-            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
 
             NameTable nameTable = new NameTable('.', stringTable);
             NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
@@ -42,7 +42,7 @@ namespace Test.Tool.Analyzers
         public void NameTable_can_store_two_elements()
         {
             StringTable stringTable = new StringTable();
-            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
 
             NameTable nameTable = new NameTable('.', stringTable);
             NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
@@ -61,7 +61,7 @@ namespace Test.Tool.Analyzers
         public void NameTable_can_store_one_complex_element()
         {
             StringTable stringTable = new StringTable();
-            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
 
             NameTable nameTable = new NameTable('.', stringTable);
             NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
@@ -80,7 +80,7 @@ namespace Test.Tool.Analyzers
         public void NameTable_can_store_two_complex_elements()
         {
             StringTable stringTable = new StringTable();
-            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
 
             NameTable nameTable = new NameTable('.', stringTable);
             NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
@@ -101,7 +101,7 @@ namespace Test.Tool.Analyzers
         public void NameTable_can_store_three_complex_elements()
         {
             StringTable stringTable = new StringTable();
-            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
 
             NameTable nameTable = new NameTable('.', stringTable);
             NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);

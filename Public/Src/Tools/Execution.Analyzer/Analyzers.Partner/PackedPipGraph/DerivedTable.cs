@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Security.Cryptography;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -25,6 +24,20 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public DerivedTable(TBaseTable baseTable)
         {
             BaseTable = baseTable;
+        }
+
+        public void Set(TId id, TValue value)
+        {
+            if (id.Equals(default)) { throw new ArgumentException("Cannot set default ID"); }
+            if (id.FromId() > BaseTable.Count()) { throw new ArgumentException($"ID {id.FromId()} is out of range of base table {BaseTable.Count()}"); }
+
+            if (BaseTable.Count() > m_values.Capacity)
+            {
+                // grow a little ahead of the base table
+                m_values.Capacity = (int)(BaseTable.Count() * 1.2);
+            }
+
+            m_values[id.FromId()] = value;
         }
     }
 }

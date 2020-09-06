@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using BuildXL.Storage.Fingerprints;
 using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
@@ -33,12 +30,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public readonly NameId Prefix;
         public readonly StringId Atom;
         public NameEntry(NameId prefix, StringId atom) { Prefix = prefix; Atom = atom; }
-        public override int GetHashCode() => HashCodeHelper.Combine(Prefix.GetHashCode(), Atom.GetHashCode());
 
         public struct EqualityComparer : IEqualityComparer<NameEntry>
         {
             public bool Equals(NameEntry x, NameEntry y) => x.Prefix.Equals(y.Prefix) && x.Atom.Equals(y.Atom);
-            public int GetHashCode([DisallowNull] NameEntry obj) => obj.GetHashCode();
+            public int GetHashCode([DisallowNull] NameEntry obj) =>
+                HashCodeHelper.Combine(obj.Prefix.GetHashCode(), obj.Atom.GetHashCode());
         }
     }
 
@@ -140,15 +137,15 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             return new string(textSpan);
         }
 
-        public new class Builder : BaseTable<NameId, NameEntry>.Builder
+        public class Builder : CachingBuilder<NameEntry.EqualityComparer>
         {
-            public Builder(NameTable table, StringTable.Builder stringTableBuilder) : base(table) 
+            public Builder(NameTable table, StringTable.CachingBuilder stringTableBuilder) : base(table) 
             {
                 m_stringTableBuilder = stringTableBuilder;
             }
 
             private NameTable NameTable => (NameTable)BaseTable;
-            private readonly StringTable.Builder m_stringTableBuilder;
+            private readonly StringTable.CachingBuilder m_stringTableBuilder;
 
             /// <summary>
             /// Split this string into its constituent pieces and ensure it exists as a Name.
