@@ -13,19 +13,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// This serves as the "core data" of the entity with the given ID.
     /// Other derived tables and relations can be built sharing the same base table.
     /// </remarks>
-    public abstract class BaseTable<TId, TValue> : Table<TId>
+    public abstract class BaseTable<TId, TValue> : ValueTable<TId, TValue>
         where TId : struct, Id<TId>
     {
-        /// <summary>
-        /// List of values; index in list = ID of value.
-        /// </summary>
-        private readonly List<TValue> m_values = new List<TValue>(); 
-
         public BaseTable()
         {
-            // The 0'th entry is always preallocated, so we can use it as a sentinel in any table.
-            // In other words: 0 is never a valid backing value for any TId.
-            m_values.Add(default(TValue));
         }
 
         /// <summary>
@@ -47,9 +39,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             {
                 BaseTable = baseTable;
                 // always skip the zero element
-                for (int i = 1; i < baseTable.m_values.Count; i++)
+                for (int i = 1; i < baseTable.Values.Count; i++)
                 {
-                    Entries.Add(baseTable.m_values[i], default(TId).ToId(i));
+                    Entries.Add(baseTable.Values[i], default(TId).ToId(i));
                 }
             }
 
@@ -62,30 +54,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 else
                 {
                     // bit of an odd creation idiom, but should be zero-allocation and no-virtcall
-                    id = default(TId).ToId(BaseTable.m_values.Count);
-                    BaseTable.m_values.Add(value);
+                    id = default(TId).ToId(BaseTable.Values.Count);
+                    BaseTable.Values.Add(value);
                     Entries.Add(value, id);
                     return id;
                 }
             }
         }
-
-        public int Count() => m_values.Count - 1;
-
-        /// <summary>
-        /// Return the current range of defined IDs.
-        /// </summary>
-        /// <remarks>
-        /// Mainly useful for testing.
-        /// </remarks>
-        public override IEnumerable<TId> Ids =>
-            m_values.Count == 1 
-                ? Enumerable.Empty<TId>() 
-                : Enumerable.Range(1, m_values.Count - 1).Select(v => default(TId).ToId(v));
-
-        /// <summary>
-        /// Get a value from the table.
-        /// </summary>
-        public TValue this[TId id] => m_values[id.FromId()];
     }
 }
