@@ -54,10 +54,10 @@ namespace Test.Tool.Analyzers
             builder.GetOrAdd("a");
             builder.GetOrAdd("b");
 
-            stringTable.SaveToFile(TemporaryDirectory, "stringtable.txt");
+            stringTable.SaveToFile(TemporaryDirectory, $"{nameof(StringTable)}.bin");
 
             StringTable stringTable2 = new StringTable();
-            stringTable2.LoadFromFile(TemporaryDirectory, "stringtable.txt");
+            stringTable2.LoadFromFile(TemporaryDirectory, $"{nameof(StringTable)}.bin");
 
             XAssert.AreEqual(stringTable.Count, stringTable2.Count);
             foreach (StringId id in stringTable.Ids)

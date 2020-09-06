@@ -136,14 +136,14 @@ namespace Test.Tool.Analyzers
             nameTableBuilder.GetOrAdd("a.b.d.e");
             nameTableBuilder.GetOrAdd("a.f.g.h");
 
-            stringTable.SaveToFile(TemporaryDirectory, "stringtable.txt");
-            nameTable.SaveToFile(TemporaryDirectory, "nametable.bin");
+            stringTable.SaveToFile(TemporaryDirectory, $"{nameof(StringTable)}.bin");
+            nameTable.SaveToFile(TemporaryDirectory, $"{nameof(NameTable)}.bin");
 
             StringTable stringTable2 = new StringTable();
             NameTable nameTable2 = new NameTable('.', stringTable2);
 
-            stringTable2.LoadFromFile(TemporaryDirectory, "stringtable.txt");
-            nameTable2.LoadFromFile(TemporaryDirectory, "nametable.bin");
+            stringTable2.LoadFromFile(TemporaryDirectory, $"{nameof(StringTable)}.bin");
+            nameTable2.LoadFromFile(TemporaryDirectory, $"{nameof(NameTable)}.bin");
 
             XAssert.AreEqual(8, nameTable2.Count);
             XAssert.AreEqual("a", nameTable2.GetText(nameTable2.Ids.First()));
