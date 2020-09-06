@@ -61,7 +61,7 @@ namespace Test.Tool.Analyzers
             CacheMissAnalyzerResultExtensions.FingerprintStoreAnalyzerTestsClass = this;
         }
 
-        //[Fact]
+        [Fact]
         public void SourceFileWeakFingerprintMiss()
         {
             FileArtifact srcFile = CreateSourceFile();
@@ -85,7 +85,7 @@ namespace Test.Tool.Analyzers
             RunAnalyzer(cacheHitBuild, cacheMissBuild).AssertPipMiss(pip, PipCacheMissType.MissForDescriptorsDueToWeakFingerprints, messages);
         }
 
-        //[Fact]
+        [Fact]
         public virtual void AbsentFileProbeReadOnlyMountStrongFingerprintMiss()
         {
             // Read only mount
@@ -123,7 +123,7 @@ namespace Test.Tool.Analyzers
                 build1.Session.RelatedId);
         }
 
-        //[Fact]
+        [Fact]
         public void DirectoryEnumerationReadOnlyMountStrongFingerprintMiss()
         {
             string[] messages;
@@ -170,7 +170,7 @@ namespace Test.Tool.Analyzers
                 messages);
         }
 
-        //[Fact]
+        [Fact]
         public void NonCacheableAllowlistPipMiss()
         {
             FileArtifact allowlistFile = CreateSourceFile();
@@ -198,7 +198,7 @@ namespace Test.Tool.Analyzers
                 messages);
         }
 
-        //[Fact]
+        [Fact]
         public void FileAccessViolationUncacheablePipMiss()
         {
             Configuration.Sandbox.UnsafeSandboxConfigurationMutable.UnexpectedFileAccessesAreErrors = false;
@@ -229,7 +229,7 @@ namespace Test.Tool.Analyzers
         /// This prevents analysis of any downstream pips, even if they
         /// had a cache miss cause other than the upstream pip being executed.
         /// </note>
-        //[Fact]
+        [Fact]
         public void TestAllPipsOption()
         {
             FileArtifact srcA = CreateSourceFile();
@@ -286,7 +286,7 @@ namespace Test.Tool.Analyzers
                 ArtifactToPrint(srcB));
         }
 
-        //[Fact]
+        [Fact]
         public void FilterSkippedPipNoFingerprint()
         {
             FileArtifact src = CreateSourceFile();
@@ -336,7 +336,7 @@ namespace Test.Tool.Analyzers
                 messages);
         }
 
-        //[Fact]
+        [Fact]
         public void CommandLineChangeCacheMiss()
         {
             var outFile = CreateOutputFileArtifact();
@@ -387,7 +387,7 @@ namespace Test.Tool.Analyzers
                 messages);
         }
 
-        //[Fact]
+        [Fact]
         public void DirectoryMembershipFingerprintMissing()
         {
             DirectoryArtifact dir = DirectoryArtifact.CreateWithZeroPartialSealId(CreateUniqueDirectory(ReadonlyRoot));
@@ -436,7 +436,7 @@ namespace Test.Tool.Analyzers
         /// The pip unique output hash is more stable the the pip semi stable hash, so the pip unique output hash is used for look up first
         /// before falling back on the pip semi stable hash.
         /// </summary>
-        //[Fact] 
+        [Fact] 
         public void VerifyStablePipUniqueOutputHash()
         {
             var outputFile = CreateOutputFileArtifact();
@@ -575,7 +575,7 @@ namespace Test.Tool.Analyzers
                 "No fingerprint computation data found from old build");
         }
 
-        //[Fact]
+        [Fact]
         public void NoFingerprintFoundFromBuild()
         {
             var outFile = CreateOutputFileArtifact();
@@ -639,7 +639,7 @@ namespace Test.Tool.Analyzers
                 messages);
         }
 
-        //[Fact]
+        [Fact]
         public void TestUnsafeConfigurationDiffsCorrectly()
         {
             Configuration.Sandbox.UnsafeSandboxConfigurationMutable.UnexpectedFileAccessesAreErrors = !UnsafeOptions.SafeConfigurationValues.UnexpectedFileAccessesAreErrors;
@@ -691,7 +691,7 @@ namespace Test.Tool.Analyzers
         /// Checks that <see cref="FingerprintStoreExecutionLogTarget.CacheLookupFingerprintStore"/> is used before the <see cref="FingerprintStoreExecutionLogTarget.ExecutionFingerprintStore"/>
         /// when looking for fingerprints from the newer build.
         /// </summary>
-        //[Fact]
+        [Fact]
         public void EnsureCacheLookupStoreIsFirst()
         {
             // Read only mount
@@ -775,7 +775,7 @@ namespace Test.Tool.Analyzers
             XAssert.AreNotEqual(correctOut2, incorrectOut);
         }
 
-        //[Fact]
+        [Fact]
         public void OutputMissingTest()
         {
             var dir = Path.Combine(ObjectRoot, "Dir");
@@ -807,7 +807,7 @@ namespace Test.Tool.Analyzers
             RunAnalyzer(cacheHitBuild, cacheMissBuild).AssertPipMiss(pip.Process, PipCacheMissType.MissForProcessOutputContent, messages);
         }
 
-        //[Fact]
+        [Fact]
         public void ExtraFingerprintSaltsTest()
         {
             var dir = Path.Combine(ObjectRoot, "Dir");
