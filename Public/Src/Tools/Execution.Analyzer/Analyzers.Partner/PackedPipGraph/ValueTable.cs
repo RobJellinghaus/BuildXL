@@ -50,6 +50,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Get a value from the table.
         /// </summary>
-        public TValue this[TId id] => Values[id.FromId()];
+        public virtual TValue this[TId id] => Values[id.FromId()];
     }
 }
