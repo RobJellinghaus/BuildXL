@@ -26,6 +26,7 @@ namespace Test.Tool.Analyzers
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("a");
             XAssert.IsTrue(id.Equals(id2));
+            XAssert.IsFalse(id.Equals(default));
             XAssert.AreEqual("a", stringTable[id]);
             XAssert.AreEqual(1, stringTable.Count());
             XAssert.AreEqual(1, stringTable.Ids.Count());

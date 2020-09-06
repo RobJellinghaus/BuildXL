@@ -107,14 +107,18 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             NameEntry entry = this[nameId];
             ReadOnlySpan<char> prefixSpan;
-            if (!entry.Prefix.Equals(default(NameId)))
+            if (!entry.Prefix.Equals(default))
             {
+                // recurse on the prefix, which will result in it getting written into the first part of span
                 prefixSpan = GetText(entry.Prefix, span);
+                // add the separator
                 span[prefixSpan.Length] = Separator;
+
                 prefixSpan = span.Slice(0, prefixSpan.Length + 1);
             }
             else
             {
+                // we're at the start -- base case of the recursion
                 prefixSpan = span.Slice(0, 0);
             }
             string atom = StringTable[entry.Atom];
@@ -149,11 +153,15 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             /// <summary>
             /// Split this string into its constituent pieces and ensure it exists as a Name.
             /// </summary>
+            /// <remarks>
+            /// This is not very efficient since it uses string.Split rather than something Span-based,
+            /// but all the allocations are temporary, so not optimizing it... yet.
+            /// </remarks>
             public NameId GetOrAdd(string s)
             {
                 string[] pieces = s.Split(NameTable.Separator, System.StringSplitOptions.RemoveEmptyEntries);
 
-                NameId prefixId = default(NameId);
+                NameId prefixId = default;
                 foreach (string p in pieces)
                 {
                     StringId atomId = m_stringTableBuilder.GetOrAdd(p);
