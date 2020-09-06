@@ -39,7 +39,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class StringTable : BaseTable<StringId, string>
     {
-        public StringTable()
+        public StringTable(int capacity = -1) : base(capacity)
         {
         }
 

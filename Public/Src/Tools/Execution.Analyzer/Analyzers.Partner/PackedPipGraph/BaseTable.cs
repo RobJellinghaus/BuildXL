@@ -16,7 +16,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public abstract class BaseTable<TId, TValue> : ValueTable<TId, TValue>
         where TId : struct, Id<TId>
     {
-        public BaseTable()
+        public BaseTable(int capacity = -1) : base(capacity)
         {
         }
 

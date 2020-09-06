@@ -29,7 +29,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class WorkerTable : BaseTable<WorkerId, StringId>
     {
-        public WorkerTable()
+        public WorkerTable(int capacity = -1) : base(capacity)
         {
         }
 
