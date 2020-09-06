@@ -15,10 +15,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class DerivedTable<TId, TValue, TBaseValue, TBaseTable> : ValueTable<TId, TValue>
         where TId : struct, Id<TId>
+        where TValue : unmanaged
         where TBaseTable : BaseTable<TId, TBaseValue>
     {
-        private readonly List<TValue> m_values = new List<TValue>();
-
         public readonly TBaseTable BaseTable;
 
         public DerivedTable(TBaseTable baseTable)
@@ -31,13 +30,24 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             if (id.Equals(default)) { throw new ArgumentException("Cannot set default ID"); }
             if (id.FromId() > BaseTable.Count()) { throw new ArgumentException($"ID {id.FromId()} is out of range of base table {BaseTable.Count()}"); }
 
-            if (BaseTable.Count() > m_values.Capacity)
+            if (BaseTable.Count() > Values.Capacity)
             {
                 // grow a little ahead of the base table
-                m_values.Capacity = (int)(BaseTable.Count() * 1.2);
+                Values.Capacity = (int)(BaseTable.Count() * 1.2);
             }
 
-            m_values[id.FromId()] = value;
+            Values[id.FromId()] = value;
+        }
+
+        public override void SaveToFile(string directory, string name)
+        {
+            FileSpanUtilities.SaveToFile<TValue>(directory, name, Values);
+        }
+
+        public override void LoadFromFile(string directory, string name)
+        {
+            Values.Clear();
+            Values.AddRange(FileSpanUtilities.LoadFromFile<TValue>(directory, name));
         }
     }
 }

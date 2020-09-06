@@ -42,7 +42,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <remarks>
     /// Every single file in an XLG trace goes into this one table.
     /// </remarks>
-    public class FileTable : BaseTable<FileId, FileEntry>
+    public class FileTable : BaseUnmanagedTable<FileId, FileEntry>
     {
         public readonly NameTable FileNameTable;
 

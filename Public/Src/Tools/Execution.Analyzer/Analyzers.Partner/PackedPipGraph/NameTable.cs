@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Runtime.InteropServices;
 using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
@@ -42,7 +44,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <summary>
     /// Suffix table representation of sequential names, such as pip names or file paths.
     /// </summary>
-    public class NameTable : BaseTable<NameId, NameEntry>
+    public class NameTable : BaseUnmanagedTable<NameId, NameEntry>
     {
         /// <summary>
         /// The separator between parts of names in this table.

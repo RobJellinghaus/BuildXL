@@ -42,7 +42,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <summary>
     /// Table of pip data.
     /// </summary>
-    public class PipTable : BaseTable<PipId, PipEntry>
+    public class PipTable : BaseUnmanagedTable<PipId, PipEntry>
     {
         public readonly NameTable PipNameTable;
 

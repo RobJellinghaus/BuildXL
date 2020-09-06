@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
-using BuildXL.Execution.Analyzer.JPath;
-using Google.Protobuf.WellKnownTypes;
+using System.IO;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -41,11 +38,30 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     {
         public StringTable(int capacity = -1) : base(capacity)
         {
+            // zeroth entry is the empty string; works better with saving/loading than null
+            Values[0] = "";
+        }
+
+        public override void SaveToFile(string directory, string name)
+        {
+            File.WriteAllLines(Path.Combine(directory, name), Values);
+        }
+
+        public override void LoadFromFile(string directory, string name)
+        {
+            Values.Clear();
+            Values.AddRange(File.ReadAllLines(Path.Combine(directory, name)));
         }
 
         public class CachingBuilder : CachingBuilder<StringComparerNonNull>
         {
             public CachingBuilder(StringTable table) : base(table) { }
+
+            public override StringId GetOrAdd(string value)
+            {
+                if (value == null) { throw new ArgumentNullException("Cannot insert null string into StringTable"); }
+                return base.GetOrAdd(value);
+            }
         }
     }
 }

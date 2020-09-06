@@ -30,6 +30,22 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
         }
 
+        /// <summary>
+        /// The IDs stored in this Table.
+        /// </summary>
         public abstract IEnumerable<TId> Ids { get; }
+
+        /// <summary>
+        /// Save the contents of this table in the given directory with the given filename.
+        /// </summary>
+        public abstract void SaveToFile(string directory, string name);
+
+        /// <summary>
+        /// Load the contents of this table from the given directory with the given filename.
+        /// </summary>
+        /// <remarks>
+        /// Any existing contents of this table will be discarded before loading.
+        /// </remarks>
+        public abstract void LoadFromFile(string directory, string name);
     }
 }

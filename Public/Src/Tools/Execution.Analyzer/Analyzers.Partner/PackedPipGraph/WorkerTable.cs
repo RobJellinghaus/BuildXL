@@ -27,7 +27,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <remarks>
     /// The value is the worker's MachineName.
     /// </remarks>
-    public class WorkerTable : BaseTable<WorkerId, StringId>
+    public class WorkerTable : BaseUnmanagedTable<WorkerId, StringId>
     {
         public WorkerTable(int capacity = -1) : base(capacity)
         {

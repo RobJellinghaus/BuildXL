@@ -46,7 +46,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 }
             }
 
-            public TId GetOrAdd(TValue value)
+            public virtual TId GetOrAdd(TValue value)
             {
                 if (Entries.TryGetValue(value, out TId id))
                 {
