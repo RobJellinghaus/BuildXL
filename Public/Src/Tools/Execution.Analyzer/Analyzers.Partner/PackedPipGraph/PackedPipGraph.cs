@@ -24,6 +24,24 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             FileTable = new FileTable(StringTable);
         }
 
+        private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.txt";
+        private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
+        private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
+
+        public void SaveToDirectory(string directory)
+        {
+            StringTable.SaveToFile(directory, s_stringTableFileName);
+            PipTable.SaveToFile(directory, s_pipTableFileName);
+            FileTable.SaveToFile(directory, s_fileTableFileName);
+        }
+
+        public void LoadFromDirectory(string directory)
+        {
+            StringTable.LoadFromFile(directory, s_stringTableFileName);
+            PipTable.LoadFromFile(directory, s_pipTableFileName);
+            FileTable.LoadFromFile(directory, s_fileTableFileName);
+        }
+
         public class Builder
         {
             public readonly PackedPipGraph PipGraph;

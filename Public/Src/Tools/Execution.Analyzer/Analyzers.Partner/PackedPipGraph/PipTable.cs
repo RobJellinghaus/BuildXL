@@ -51,6 +51,18 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             PipNameTable = new NameTable('.', stringTable);
         }
 
+        public override void SaveToFile(string directory, string name)
+        {
+            base.SaveToFile(directory, name);
+            PipNameTable.SaveToFile(directory, $"{nameof(PipNameTable)}.{name}");
+        }
+
+        public override void LoadFromFile(string directory, string name)
+        {
+            base.LoadFromFile(directory, name);
+            PipNameTable.LoadFromFile(directory, $"{nameof(PipNameTable)}.{name}");
+        }
+
         public class CachingBuilder : CachingBuilder<PipEntry.EqualityComparer>
         {
             public readonly NameTable.Builder NameTableBuilder;
