@@ -21,9 +21,9 @@ namespace Test.Tool.Analyzers
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
 
-            XAssert.AreEqual(0, pipGraph.PipTable.Count());
-            XAssert.AreEqual(0, pipGraph.FileTable.Count());
-            XAssert.AreEqual(0, pipGraph.StringTable.Count());
+            XAssert.AreEqual(0, pipGraph.PipTable.Count);
+            XAssert.AreEqual(0, pipGraph.FileTable.Count);
+            XAssert.AreEqual(0, pipGraph.StringTable.Count);
         }
 
         [Fact]
@@ -36,9 +36,9 @@ namespace Test.Tool.Analyzers
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";            
             PipId id = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
 
-            XAssert.AreEqual(1, pipGraph.PipTable.Count());
-            XAssert.AreEqual(0, pipGraph.FileTable.Count());
-            XAssert.AreEqual(5, pipGraph.StringTable.Count());
+            XAssert.AreEqual(1, pipGraph.PipTable.Count);
+            XAssert.AreEqual(0, pipGraph.FileTable.Count);
+            XAssert.AreEqual(5, pipGraph.StringTable.Count);
 
             PipEntry entry = pipGraph.PipTable[id];
             XAssert.AreEqual(hash, pipGraph.StringTable[entry.Hash]);
@@ -54,9 +54,9 @@ namespace Test.Tool.Analyzers
             string path = "d:\\os\\bin\\shellcommon\\shell\\merged\\winmetadata\\appresolverux.winmd";
             FileId id = pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024);
 
-            XAssert.AreEqual(0, pipGraph.PipTable.Count());
-            XAssert.AreEqual(1, pipGraph.FileTable.Count());
-            XAssert.AreEqual(8, pipGraph.StringTable.Count());
+            XAssert.AreEqual(0, pipGraph.PipTable.Count);
+            XAssert.AreEqual(1, pipGraph.FileTable.Count);
+            XAssert.AreEqual(8, pipGraph.StringTable.Count);
 
             XAssert.AreEqual(path, pipGraph.FileTable.FileNameTable.GetText(pipGraph.FileTable[id].Name));
         }

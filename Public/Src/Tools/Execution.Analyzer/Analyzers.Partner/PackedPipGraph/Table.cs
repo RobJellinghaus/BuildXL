@@ -36,6 +36,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public abstract IEnumerable<TId> Ids { get; }
 
         /// <summary>
+        /// The number of IDs currently stored in the Table.
+        /// </summary>
+        public abstract int Count { get; }
+
+        /// <summary>
         /// Save the contents of this table in the given directory with the given filename.
         /// </summary>
         public abstract void SaveToFile(string directory, string name);

@@ -34,7 +34,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             Values.Add(default(TValue));
         }
 
-        public int Count() => Values.Count - 1;
+        public override int Count => Values.Count - 1;
 
         /// <summary>
         /// Return the current range of defined IDs.

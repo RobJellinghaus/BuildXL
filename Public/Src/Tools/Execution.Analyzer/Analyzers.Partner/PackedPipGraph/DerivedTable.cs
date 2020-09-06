@@ -13,10 +13,10 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// The DerivedTable entries must only refer to IDs that exist in the base table at the time
     /// when the entry was added to the derived table.
     /// </remarks>
-    public class DerivedTable<TId, TValue, TBaseValue, TBaseTable> : ValueTable<TId, TValue>
+    public class DerivedTable<TId, TValue, TBaseTable> : ValueTable<TId, TValue>
         where TId : struct, Id<TId>
         where TValue : unmanaged
-        where TBaseTable : BaseTable<TId, TBaseValue>
+        where TBaseTable : Table<TId>
     {
         public readonly TBaseTable BaseTable;
 
@@ -28,12 +28,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public void Set(TId id, TValue value)
         {
             if (id.Equals(default)) { throw new ArgumentException("Cannot set default ID"); }
-            if (id.FromId() > BaseTable.Count()) { throw new ArgumentException($"ID {id.FromId()} is out of range of base table {BaseTable.Count()}"); }
+            if (id.FromId() > BaseTable.Count) { throw new ArgumentException($"ID {id.FromId()} is out of range of base table {BaseTable.Count}"); }
 
-            if (BaseTable.Count() > Values.Capacity)
+            if (BaseTable.Count > Values.Capacity)
             {
                 // grow a little ahead of the base table
-                Values.Capacity = (int)(BaseTable.Count() * 1.2);
+                Values.Capacity = (int)(BaseTable.Count * 1.2);
             }
 
             Values[id.FromId()] = value;
