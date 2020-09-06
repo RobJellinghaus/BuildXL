@@ -97,5 +97,30 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual(3, nameTable.Ids.Count());
         }
 
+        [Fact]
+        public void NameTable_can_store_three_complex_elements()
+        {
+            StringTable stringTable = new StringTable();
+            StringTable.Builder stringTableBuilder = new StringTable.Builder(stringTable);
+
+            NameTable nameTable = new NameTable('.', stringTable);
+            NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
+
+            NameId id = nameTableBuilder.GetOrAdd("a.b.c");
+            NameId id2 = nameTableBuilder.GetOrAdd("a.b.d.e");
+            NameId id3 = nameTableBuilder.GetOrAdd("a.f.g.h");
+
+            XAssert.IsFalse(id.Equals(id2));
+            XAssert.IsFalse(id.Equals(id3));
+            XAssert.IsFalse(id2.Equals(id3));
+            XAssert.AreEqual("a.b.c", nameTable.GetText(id));
+            XAssert.AreEqual(5, nameTable.Length(id));
+            XAssert.AreEqual("a.b.d.e", nameTable.GetText(id2));
+            XAssert.AreEqual(7, nameTable.Length(id2));
+            XAssert.AreEqual("a.f.g.h", nameTable.GetText(id3));
+            XAssert.AreEqual(7, nameTable.Length(id3));
+            XAssert.AreEqual(8, nameTable.Count());
+            XAssert.AreEqual(8, nameTable.Ids.Count());
+        }
     }
 }
