@@ -122,5 +122,32 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual(8, nameTable.Count);
             XAssert.AreEqual(8, nameTable.Ids.Count());
         }
+
+        [Fact]
+        public void NameTable_can_save_and_load()
+        {
+            StringTable stringTable = new StringTable();
+            StringTable.CachingBuilder stringTableBuilder = new StringTable.CachingBuilder(stringTable);
+
+            NameTable nameTable = new NameTable('.', stringTable);
+            NameTable.Builder nameTableBuilder = new NameTable.Builder(nameTable, stringTableBuilder);
+
+            nameTableBuilder.GetOrAdd("a.b.c");
+            nameTableBuilder.GetOrAdd("a.b.d.e");
+            nameTableBuilder.GetOrAdd("a.f.g.h");
+
+            stringTable.SaveToFile(TemporaryDirectory, "stringtable.txt");
+            nameTable.SaveToFile(TemporaryDirectory, "nametable.bin");
+
+            StringTable stringTable2 = new StringTable();
+            NameTable nameTable2 = new NameTable('.', stringTable2);
+
+            stringTable2.LoadFromFile(TemporaryDirectory, "stringtable.txt");
+            nameTable2.LoadFromFile(TemporaryDirectory, "nametable.bin");
+
+            XAssert.AreEqual(8, nameTable2.Count);
+            XAssert.AreEqual("a", nameTable2.GetText(nameTable2.Ids.First()));
+            XAssert.AreEqual("a.f.g.h", nameTable2.GetText(nameTable2.Ids.Last()));
+        }
     }
 }
