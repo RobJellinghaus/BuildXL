@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using BuildXL.ToolSupport;
-using Microsoft.VisualStudio.Services.Location;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -187,6 +185,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                     {
                         throw new Exception(
                             $"RelationTable.Inverse: logic exception: positions[{relatedIdInt}] = {positions[relatedIdInt]}, result.Values[{relatedIdInt}] = {result.Values[relatedIdInt]}");
+                    }
+                    else if (positions[relatedIdInt] == result.Values[relatedIdInt])
+                    {
+                        // all the relations for this ID are known. now, we have to sort them.
+                        Span<TFromId> finalSpan = result.m_relations.AsSpan().Slice(m_offsets[relatedIdInt], Values[relatedIdInt]);
+                        SpanUtilities.Sort(finalSpan, (id1, id2) => id1.FromId().CompareTo(id2.FromId()));
                     }
 
                     Console.WriteLine($"RelationTable.Invert: TFromId {id}, TToId {relatedId}: {result.ToFullString()}");
