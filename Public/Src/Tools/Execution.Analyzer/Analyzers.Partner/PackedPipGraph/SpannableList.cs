@@ -61,7 +61,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             {
                 do
                 {
-                    Console.WriteLine($"SpannableList.EnsureCapacity: nextSize {nextSize}, Count + numItems {Count + numItems}");
                     nextSize = (int)(nextSize * GrowthFactor) + 1;
                 }
                 while (Count + numItems >= nextSize);
@@ -104,8 +103,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             EnsureCapacity(count);
             m_elements.AsSpan().Slice(originalCount, count).Fill(value);
             Count += count;
-
-            Console.WriteLine($"SpannableList.Fill: originalCount {originalCount}, count {Count}");
         }
 
         public void AddRange(ReadOnlySpan<T> values)

@@ -15,7 +15,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             where TValue : unmanaged
         {
             string path = Path.Combine(directory, name);
-            Console.WriteLine($"FileSpanUtilities.SaveToFile: writing to {path} contents {values.ToFullString()}");
 
             using (Stream writer = File.OpenWrite(path))
             {
@@ -39,16 +38,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 reader.Read(MemoryMarshal.Cast<int, byte>(new Span<int>(lengthBuf)));
                 int length = lengthBuf[0];
 
-                Console.WriteLine($"FileSpanUtilities.LoadFromFile: reading {length} values");
-
                 values.Fill(length, default);
 
                 Span<TValue> valueSpan = values.AsSpan();
                 Span<byte> byteValueSpan = MemoryMarshal.Cast<TValue, byte>(valueSpan);
                 reader.Read(byteValueSpan);
             }
-
-            Console.WriteLine($"FileSpanUtilities.LoadFromFile: read from {path} contents {values.ToFullString()}");
         }
     }
 }
