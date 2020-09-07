@@ -35,8 +35,12 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual(1, relationTable[pipId]);
 
             ReadOnlySpan<PipId> relations = relationTable.GetRelations(pipId);
+            XAssert.AreEqual(pipId, relations[0]);
 
-            XAssert.AreEqual(relations[0], pipId);
+            RelationTable<PipId, PipId, PipTable, PipTable> inverseRelationTable = relationTable.Invert();
+
+            //XAssert.AreEqual(1, inverseRelationTable[pipId]);
+            //XAssert.AreEqual(pipId, inverseRelationTable.GetRelations(pipId)[0]);
         }
 
         [Fact]

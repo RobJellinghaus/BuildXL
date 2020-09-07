@@ -144,8 +144,10 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             RelationTable<TToId, TFromId, TToTable, TFromTable> result =
                 new RelationTable<TToId, TFromId, TToTable, TFromTable>(RelatedTable, BaseTable);
 
-            // We will use result.Values to accumulate the counts.
-            result.Values.Fill(RelatedTable.Count, default);
+            // We will use result.Values to accumulate the counts as usual.
+            result.Values.Fill(RelatedTable.Count, 0);
+            // And we will use result.m_offsets to store the offsets as usual.
+            result.m_offsets.Fill(RelatedTable.Count, 0);
 
             int sum = 0;
             foreach (TFromId id in BaseTable.Ids)
@@ -165,10 +167,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
             // And we know the necessary size of m_relations.
             result.m_relations.Capacity = sum;
+            result.m_relations.Fill(sum, default);
 
             // Allocate an array of positions to track how many relations we have filled in.
             SpannableList<int> positions = new SpannableList<int>(RelatedTable.Count);
-            positions.Fill(RelatedTable.Count, 0);
+            positions.Fill(RelatedTable.Count + 1, 0);
 
             // And accumulate all the inverse relations.
             foreach (TFromId id in BaseTable.Ids)
@@ -189,6 +192,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                     Console.WriteLine($"RelationTable.Invert: TFromId {id}, TToId {relatedId}: {result.ToFullString()}");
                 }
             }
+
+            // TODO: error check that there are no zero entries in m_relations
 
             return result;
         }
