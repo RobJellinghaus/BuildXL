@@ -3,7 +3,6 @@
 
 using BuildXL.Execution.Analyzers.PackedPipGraph;
 using System;
-using System.Linq;
 using Test.BuildXL.TestUtilities.Xunit;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,7 +22,7 @@ namespace Test.Tool.Analyzers
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
+            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
 
             RelationTable<PipId, PipId, PipTable, PipTable> relationTable =
                 new RelationTable<PipId, PipId, PipTable, PipTable>(pipGraph.PipTable, pipGraph.PipTable);
@@ -50,9 +49,9 @@ namespace Test.Tool.Analyzers
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
-            PipId pipId2 = pipGraphBuilder.PipTableBuilder.GetOrAdd($"{hash}2", $"{name}2", new TimeSpan(0, 10, 0));
-            PipId pipId3 = pipGraphBuilder.PipTableBuilder.GetOrAdd($"{hash}3", $"{name}3", new TimeSpan(0, 10, 0));
+            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
+            PipId pipId2 = pipGraphBuilder.PipTableBuilder.GetOrAdd($"{hash}2", $"{name}2", PipType.Process);
+            PipId pipId3 = pipGraphBuilder.PipTableBuilder.GetOrAdd($"{hash}3", $"{name}3", PipType.Process);
 
             XAssert.AreNotEqual(pipId, pipId2);
             XAssert.AreNotEqual(pipId, pipId3);

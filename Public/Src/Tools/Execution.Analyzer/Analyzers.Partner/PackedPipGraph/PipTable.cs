@@ -8,9 +8,70 @@ using System.Diagnostics.CodeAnalysis;
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
     /// <summary>
+    /// Enumeration representing the types of pips.
+    /// </summary>
+    /// <remarks>
+    /// This is very debatable, copying this from BuildXL\Public\Src\Pips\Dll\Operations\PipType.cs.
+    /// Pro: having this in the separate library means the library is standalone and doesn't need
+    /// pieces of BXL itself. Con: obvious duplication and code drift. Solution: TBD.
+    /// </remarks>
+    public enum PipType : byte
+    {
+        /// <summary>
+        /// A write file pip.
+        /// </summary>
+        WriteFile,
+
+        /// <summary>
+        /// A copy file pip.
+        /// </summary>
+        CopyFile,
+
+        /// <summary>
+        /// A process pip.
+        /// </summary>
+        Process,
+
+        /// <summary>
+        /// A pip representing an IPC call (to some other service pip)
+        /// </summary>
+        Ipc,
+
+        /// <summary>
+        /// A value pip
+        /// </summary>
+        Value,
+
+        /// <summary>
+        /// A spec file pip
+        /// </summary>
+        SpecFile,
+
+        /// <summary>
+        /// A module pip
+        /// </summary>
+        Module,
+
+        /// <summary>
+        /// A pip representing the hashing of a source file
+        /// </summary>
+        HashSourceFile,
+
+        /// <summary>
+        /// A pip representing the completion of a directory (after which it is immutable).
+        /// </summary>
+        SealDirectory,
+
+        /// <summary>
+        /// This is a non-value, but places an upper-bound on the range of the enum
+        /// </summary>
+        Max,
+    }
+
+    /// <summary>
     /// Boilerplate ID type to avoid ID confusion in code.
     /// </summary>
-    public struct PipId : Id<PipId>, IEqualityComparer<PipId>
+    public readonly struct PipId : Id<PipId>, IEqualityComparer<PipId>
     {
         internal readonly int Value;
         internal PipId(int value) { Value = value; }
@@ -23,11 +84,30 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
     public struct PipEntry
     {
+        /// <summary>
+        /// Semi-stable hash.
+        /// </summary>
         public readonly StringId Hash;
+
+        /// <summary>
+        /// Full name.
+        /// </summary>
         public readonly NameId Name;
-        // TODO: do we want ExecutionTime to be in a DerivedTable? (we may, if we want to experiment with it)
-        public readonly TimeSpan ExecutionTime;
-        public PipEntry(StringId hash, NameId name, TimeSpan executionTime) { Hash = hash; Name = name; ExecutionTime = executionTime; }
+
+        /// <summary>
+        /// Pip type.
+        /// </summary>
+        public readonly PipType PipType;
+
+        public PipEntry(
+            StringId hash,
+            NameId name,
+            PipType type)
+        { 
+            Hash = hash; 
+            Name = name;
+            PipType = type;
+        }
 
         public struct EqualityComparer : IEqualityComparer<PipEntry>
         {
@@ -75,12 +155,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 NameTableBuilder = new NameTable.Builder(table.PipNameTable, stringTableBuilder);
             }
 
-            public PipId GetOrAdd(string hash, string pipName, TimeSpan executionTime)
+            public PipId GetOrAdd(string hash, string pipName, PipType pipType)
             {
                 PipEntry entry = new PipEntry(
                     NameTableBuilder.StringTableBuilder.GetOrAdd(hash),
                     NameTableBuilder.GetOrAdd(pipName),
-                    executionTime);
+                    pipType);
                 return GetOrAdd(entry);
             }
         }

@@ -34,7 +34,7 @@ namespace Test.Tool.Analyzers
 
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";            
-            PipId id = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
+            PipId id = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, pipGraph.PipTable.Count);
             XAssert.AreEqual(0, pipGraph.FileTable.Count);
@@ -71,7 +71,7 @@ namespace Test.Tool.Analyzers
             pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024);
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, new TimeSpan(0, 5, 0));
+            pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, pipGraph.PipTable.Count);
             XAssert.AreEqual(1, pipGraph.FileTable.Count);

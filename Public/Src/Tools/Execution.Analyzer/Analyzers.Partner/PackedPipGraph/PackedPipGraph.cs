@@ -49,6 +49,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable = new StringTable();
             PipTable = new PipTable(StringTable);
             FileTable = new FileTable(StringTable);
+            PipDependencies = new RelationTable<PipId, PipId, PipTable, PipTable>(PipTable, PipTable);
         }
 
         private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.txt";
@@ -84,8 +85,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 FileTableBuilder = new FileTable.CachingBuilder(PipGraph.FileTable, StringTableBuilder);
             }
 
-            public PipId GetOrAddPip(string hash, string name, TimeSpan executionTime)
-                => PipTableBuilder.GetOrAdd(hash, name, executionTime);
+            public PipId GetOrAddPip(string hash, string name, PipType pipType)
+                => PipTableBuilder.GetOrAdd(hash, name, pipType);
 
             public FileId GetOrAddFile(string name, long sizeInBytes)
                 => FileTableBuilder.GetOrAdd(name, sizeInBytes);
