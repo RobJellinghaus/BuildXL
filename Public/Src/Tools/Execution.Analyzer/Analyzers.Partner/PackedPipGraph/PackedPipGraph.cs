@@ -13,9 +13,36 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </remarks>
     public class PackedPipGraph
     {
+        /// <summary>
+        /// The collection of all strings from the whole graph.
+        /// </summary>
+        /// <remarks>
+        /// Case-sensitive.
+        /// </remarks>
         public readonly StringTable StringTable;
+
+        /// <summary>
+        /// The set of all pips.
+        /// </summary>
         public readonly PipTable PipTable;
+
+        /// <summary>
+        /// The set of all files.
+        /// </summary>
         public readonly FileTable FileTable;
+
+        /// <summary>
+        /// The dependency relation (from the dependent, towards the dependency).
+        /// </summary>
+        public readonly RelationTable<PipId, PipId, PipTable, PipTable> PipDependencies;
+
+        /// <summary>
+        /// The dependent relation (from the dependency, towards the dependent).
+        /// </summary>
+        /// <remarks>
+        /// This relation is calculated as the inverse of the PipDependencies relation.
+        /// </remarks>
+        public readonly RelationTable<PipId, PipId, PipTable, PipTable> PipDependents;
 
         public PackedPipGraph()
         {

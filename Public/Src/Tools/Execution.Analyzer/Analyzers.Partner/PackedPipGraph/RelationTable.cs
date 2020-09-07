@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using BuildXL.ToolSupport;
+using Microsoft.VisualStudio.Services.Location;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -133,5 +135,62 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         }
 
         public string ToFullString() => $"Values {Values.ToFullString()}, m_offsets {m_offsets.ToFullString()}, m_relations {m_relations.ToFullString()}";
+
+        /// <summary>
+        /// Create a new RelationTable that is the inverse of this relation.
+        /// </summary>
+        public RelationTable<TToId, TFromId, TToTable, TFromTable> Invert()
+        {
+            RelationTable<TToId, TFromId, TToTable, TFromTable> result =
+                new RelationTable<TToId, TFromId, TToTable, TFromTable>(RelatedTable, BaseTable);
+
+            // We will use result.Values to accumulate the counts.
+            result.Values.Fill(RelatedTable.Count, default);
+
+            int sum = 0;
+            foreach (TFromId id in BaseTable.Ids)
+            {
+                foreach (TToId relatedId in GetRelations(id))
+                {
+                    result.Values[relatedId.FromId()]++;
+                    sum++;
+                    Console.WriteLine($"RelationTable.Invert: TFromId {id}, TToId {relatedId}: {result.ToFullString()}");
+                }
+            }
+
+            // Now we can calculate m_offsets.
+            result.CalculateOffsets();
+
+            Console.WriteLine($"RelationTable.Invert: after CalculateOffsets: {result.ToFullString()}");
+
+            // And we know the necessary size of m_relations.
+            result.m_relations.Capacity = sum;
+
+            // Allocate an array of positions to track how many relations we have filled in.
+            SpannableList<int> positions = new SpannableList<int>(RelatedTable.Count);
+            positions.Fill(RelatedTable.Count, 0);
+
+            // And accumulate all the inverse relations.
+            foreach (TFromId id in BaseTable.Ids)
+            {
+                foreach (TToId relatedId in GetRelations(id))
+                {
+                    int relatedIdInt = relatedId.FromId();
+                    int idInt = id.FromId();
+                    int relationIndex = m_offsets[relatedIdInt] + positions[relatedIdInt];
+                    result.m_relations[relationIndex] = id;
+                    positions[relatedIdInt]++;
+                    if (positions[relatedIdInt] > result.Values[relatedIdInt])
+                    {
+                        throw new Exception(
+                            $"RelationTable.Inverse: logic exception: positions[{relatedIdInt}] = {positions[relatedIdInt]}, result.Values[{relatedIdInt}] = {result.Values[relatedIdInt]}");
+                    }
+
+                    Console.WriteLine($"RelationTable.Invert: TFromId {id}, TToId {relatedId}: {result.ToFullString()}");
+                }
+            }
+
+            return result;
+        }
     }
 }
