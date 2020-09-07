@@ -108,6 +108,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             Console.WriteLine($"SpannableList.Fill: originalCount {originalCount}, count {Count}");
         }
 
+        public void AddRange(ReadOnlySpan<T> values)
+        {
+            EnsureCapacity(values.Length);
+            values.CopyTo(m_elements.AsSpan().Slice(Count, values.Length));
+            Count += values.Length;
+        }
+
         public int Capacity
         {
             get

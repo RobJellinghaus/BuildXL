@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BuildXL.ToolSupport;
 using BuildXL.Utilities.Configuration;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
@@ -36,6 +37,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <remarks>
         /// Computed from a scan over Values, which is the per-TFromId count of relations per element.
         /// Doesn't need to be a SpannableList because we never save this, we recompute it on load.
+        /// When building incrementally, this list grows progressively; if this list has fewer elements
+        /// than Count, it means only a prefix of all IDs have been added yet.
         /// </remarks>
         private readonly List<int> m_offsets;
 
@@ -53,7 +56,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             RelatedTable = relatedTable;
             m_offsets = new List<int>(Count + 1);
-            m_offsets.AddRange(Enumerable.Repeat<int>(0, Count + 1));
+            m_offsets.Add(0);
             m_relations = new SpannableList<TToId>();
         }
 
@@ -66,19 +69,15 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public override void LoadFromFile(string directory, string name)
         {
             base.LoadFromFile(directory, name);
-            m_relations.Clear();
             FileSpanUtilities.LoadFromFile<TToId>(directory, $"{s_relations}.{name}", m_relations);
             CalculateOffsets();
         }
 
-        private void CalculateOffsets()
+        private void CalculateOffsets(int startIndex = 1)
         {
-            int offset = 0;
-            for (int i = 0; i < Count; i++)
+            for (int i = 1; i < Count; i++)
             {
-                m_offsets[i + 1] = offset;
-                int count = this[default(TFromId).ToId(i)];
-                offset += count;
+                m_offsets[i] = m_offsets[i - 1] + Values[i - 1];
             }
         }
         
@@ -90,6 +89,43 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             int offset = m_offsets[id.FromId()];
             int count = Values[id.FromId()];
             return m_relations.AsSpan().Slice(offset, count);
+        }
+
+        /// <summary>
+        /// Add relations in sequence; must always add the next id.
+        /// </summary>
+        /// <remarks>
+        /// This supports only a very rudimentary form of appending, where we always append the
+        /// full set of relations (possibly empty) of a subsequent ID in the base table.
+        /// TODO: extend this to support skipping IDs without having to call for every non-related ID.
+        /// </remarks>
+        public void AddRelations(TFromId id, ReadOnlySpan<TToId> newRelations)
+        {
+            // Ensure newRelations are sorted.
+            for (int i = 1; i < newRelations.Length; i++)
+            {
+                int previous = newRelations[i - 1].FromId();
+                int current = newRelations[i].FromId();
+                if (previous >= current)
+                {
+                    throw new ArgumentException($"Cannot add unsorted data to RelationTable: data[{i - 1}] = {previous}; data[{i}] = {current}");
+                }
+            }
+
+            int idInt = id.FromId();
+            if (idInt == m_offsets.Count)
+            {
+                // this is the only valid value at which relations can be added.
+                m_offsets.Add(m_offsets[idInt - 1] + Values[idInt - 1]);
+                Values.Add(newRelations.Length);
+
+                m_relations.AddRange(newRelations);
+            }
+            else
+            {
+                throw new InvalidArgumentException(
+                    $"Cannot add relations for {idInt} to backing list with m_offsets.Count {m_offsets.Count}, Values.Count {Values.Count}, m_relations.Count {m_relations.Count}");
+            }
         }
     }
 }
