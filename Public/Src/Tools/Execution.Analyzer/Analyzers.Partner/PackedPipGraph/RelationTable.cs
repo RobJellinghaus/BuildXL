@@ -98,6 +98,26 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         }
 
         /// <summary>
+        /// Make sure toId is valid in RelatedTable.
+        /// </summary>
+        /// <remarks>
+        /// If it is not valid, an ArgumentException is thrown.
+        /// TODO: figure out how to intercept ContractsLight checks so we can hit them in the debugger.
+        /// 
+        /// This relies on the invariant that table IDs are always dense, never sparse.
+        /// TODO: if we introduce sparse derived tables, move this operation to Table[TId] where
+        /// it really belongs.
+        /// </remarks>
+        private void CheckToId(TToId toId)
+        {
+            bool isValid = toId.FromId() > 0 && toId.FromId() <= RelatedTable.Count;
+            if (!isValid)
+            {
+                throw new ArgumentException($"Id {toId} is out of range; RelatedTable {RelatedTable} has count {RelatedTable.Count}");
+            }
+        }
+
+        /// <summary>
         /// Add relations in sequence; must always add the next id.
         /// </summary>
         /// <remarks>
@@ -107,9 +127,14 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public void AddRelations(TFromId id, ReadOnlySpan<TToId> newRelations)
         {
+            if (newRelations.Length > 0)
+            {
+                CheckToId(newRelations[0]);
+            }
             // Ensure newRelations are sorted.
             for (int i = 1; i < newRelations.Length; i++)
             {
+                CheckToId(newRelations[i]);
                 int previous = newRelations[i - 1].FromId();
                 int current = newRelations[i].FromId();
                 if (previous >= current)
