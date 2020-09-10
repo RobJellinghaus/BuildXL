@@ -27,6 +27,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             BaseTable = baseTable;
             Values = new SpannableList<TValue>(Count + 1);
             Values.Add(default);
+            EnsureCount();
         }
 
         protected override IList<TValue> GetValues() => Values;
@@ -35,6 +36,17 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         public override IEnumerable<TId> Ids => BaseTable.Ids;
 
+        /// <summary>
+        /// Get the value at this id.
+        /// </summary>
+        /// <remarks>
+        /// Because we support growing base tables while also growing derived tables,
+        /// it is possible the base table got bigger and that we may not have enough
+        /// items allocated to match it in our capacity. Hence this method ensures
+        /// the derived table is as long as the base table. If this becomes expensive,
+        /// we may reconsider supporting building derived tables concurrently with 
+        /// base tables.
+        /// </remarks>
         public override TValue this[TId id]
         {
             get

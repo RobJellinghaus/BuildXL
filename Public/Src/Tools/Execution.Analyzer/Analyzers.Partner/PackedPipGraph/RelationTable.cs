@@ -148,7 +148,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             {
                 // this is the only valid value at which relations can be added.
                 m_offsets.Add(m_offsets[idInt - 1] + Values[idInt - 1]);
-                Values[idInt] = newRelations.Length;
+                Set(id, newRelations.Length);
 
                 m_relations.AddRange(newRelations);
             }
