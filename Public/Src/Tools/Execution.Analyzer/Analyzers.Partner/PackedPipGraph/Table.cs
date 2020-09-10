@@ -15,8 +15,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public interface Id<TId>
         where TId : struct
     {
-        internal int FromId();
-        internal TId ToId(int value);
+        public int FromId();
+        public TId ToId(int value);
     }
 
     /// <summary>

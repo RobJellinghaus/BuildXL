@@ -96,11 +96,15 @@ namespace BuildXL.Execution.Analyzer
                 PipGraph.AsPipReferences(PipTable.StableKeys, PipQueryContext.PipGraphRetrieveAllPips).ToList();
 
             // Populate the PipTable with all known PipIds, defining a mapping from the BXL PipIds to the PackedPipGraph PipIds.
-            List<G_PipId> pipGraphIdList = new List<G_PipId>(pipList.Count);
-            Dictionary<B_PipId, G_PipId> idMap = new Dictionary<B_PipId, G_PipId>();
             for (int i = 0; i < pipList.Count; i++)
             {
-                pipGraphIdList.Add(AddPip(pipList[i], pipBuilder, idMap));
+                // Each pip gets a G_PipId that is one plus its index in this list, since zero is never a PackedPipGraph ID value.
+                // This is observed to be exactly the same as the B_PipId, so we make sure!
+                G_PipId graphPipId = AddPip(pipList[i], pipBuilder);
+                if (graphPipId.Value != pipList[i].PipId.Value)
+                {
+                    throw new ArgumentException($"Graph pip ID {graphPipId.Value} does not equal BXL pip ID {pipList[i].PipId.Value}");
+                }
             }
 
             // Now that all pips are loaded, construct the PipDependencies RelationTable.
@@ -110,13 +114,12 @@ namespace BuildXL.Execution.Analyzer
             // Since we added all the pips in pipList order to PipTable, we can traverse them again in the same order
             // to build the relation.
             SpannableList<G_PipId> buffer = new SpannableList<G_PipId>(); // to accumulate the IDs we add to the relation
-            for (int i = 0; i < pipGraphIdList.Count; i++)
+            for (int i = 0; i < pipList.Count; i++)
             {
                 AddPipDependencies(
-                    pipGraphIdList[i],
+                    new G_PipId(i + 1),
                     pipList[i],
                     pipGraph.PipDependencies,
-                    idMap,
                     buffer);
             }
 
@@ -129,15 +132,13 @@ namespace BuildXL.Execution.Analyzer
         /// <summary>
         /// Add this pip's informationn to the graph.
         /// </summary>
-        public G_PipId AddPip(PipReference pipReference, G_PipTable.CachingBuilder pipBuilder, Dictionary<B_PipId, G_PipId> idMap)
+        public G_PipId AddPip(PipReference pipReference, G_PipTable.CachingBuilder pipBuilder)
         {
             Pip pip = pipReference.HydratePip();
             string pipName = GetDescription(pip).Replace(", ", ".");
             G_PipType pipType = (G_PipType)(int)pip.PipType;
 
-            G_PipId g_pipId = pipBuilder.GetOrAdd(pip.FormattedSemiStableHash, pipName, pipType);
-
-            idMap[pip.PipId] = g_pipId;
+            G_PipId g_pipId = pipBuilder.Add(pip.FormattedSemiStableHash, pipName, pipType);
 
             return g_pipId;
 
@@ -156,15 +157,15 @@ namespace BuildXL.Execution.Analyzer
             G_PipId g_pipId, 
             PipReference pipReference,
             RelationTable<G_PipId, G_PipId, G_PipTable, G_PipTable> relationTable,
-            Dictionary<B_PipId, G_PipId> idMap,
             SpannableList<G_PipId> buffer)
         {
             IEnumerable<G_PipId> pipDependencies = PipGraph
                 .RetrievePipReferenceImmediateDependencies(pipReference.PipId, null)
                 .Where(pipRef => pipRef.PipType != B_PipType.HashSourceFile)
-                .Select(pipRef => idMap[pipRef.PipId])
+                .Select(pid => pid.PipId.Value)
                 .Distinct()
-                .OrderBy(pid => pid);
+                .OrderBy(pid => pid)
+                .Select(pid => new G_PipId((int)pid));
 
             buffer.Clear();
             buffer.AddRange(pipDependencies);

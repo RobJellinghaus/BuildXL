@@ -11,8 +11,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </summary>
     public struct WorkerId : Id<WorkerId>, IEqualityComparer<WorkerId>
     {
-        internal readonly int Value;
-        internal WorkerId(int value) { Value = value; }
+        public readonly int Value;
+        public WorkerId(int value) { Value = value; }
         int Id<WorkerId>.FromId() => Value;
         WorkerId Id<WorkerId>.ToId(int value) => new WorkerId(value);
         public override string ToString() => $"WorkerId[{Value}]";

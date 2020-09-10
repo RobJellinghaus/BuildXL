@@ -13,8 +13,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </summary>
     public struct StringId : Id<StringId>, IEqualityComparer<StringId>
     {
-        internal readonly int Value;
-        internal StringId(int value) { Value = value; }
+        public readonly int Value;
+        public StringId(int value) { Value = value; }
         int Id<StringId>.FromId() => Value;
         StringId Id<StringId>.ToId(int value) => new StringId(value);
         public override string ToString() => $"StringId[{Value}]";

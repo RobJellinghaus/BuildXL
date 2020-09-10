@@ -73,8 +73,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// </summary>
     public readonly struct PipId : Id<PipId>, IEqualityComparer<PipId>
     {
-        internal readonly int Value;
-        internal PipId(int value) { Value = value; }
+        public readonly int Value;
+        public PipId(int value) { Value = value; }
         int Id<PipId>.FromId() => Value;
         PipId Id<PipId>.ToId(int value) => new PipId(value);
         public override string ToString() => $"PipId[{Value}]";
@@ -87,6 +87,10 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Semi-stable hash.
         /// </summary>
+        /// <remarks>
+        /// Turns out this is not a very useful unique key when exporting a pip table;
+        /// module pips and others all have hash 0.
+        /// </remarks>
         public readonly StringId Hash;
 
         /// <summary>
@@ -153,6 +157,17 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             public CachingBuilder(PipTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
             {
                 NameTableBuilder = new NameTable.Builder(table.PipNameTable, stringTableBuilder);
+            }
+
+            public PipId Add(string hash, string name, PipType pipType)
+            {
+                PipEntry entry = new PipEntry(
+                    NameTableBuilder.StringTableBuilder.GetOrAdd(hash),
+                    NameTableBuilder.GetOrAdd(name),
+                    pipType);
+
+                ((PipTable)ValueTable).Values.Add(entry);
+                return new PipId(ValueTable.Count);
             }
 
             public PipId GetOrAdd(string hash, string pipName, PipType pipType)
