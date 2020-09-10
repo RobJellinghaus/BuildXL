@@ -50,6 +50,14 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         private static readonly string s_relations = "Relations";
 
+        /// <summary>
+        /// Construct a RelationTable between baseTable and relatedTable.
+        /// </summary>
+        /// <remarks>
+        /// This currently must be constructed after baseTable has been fully populated,
+        /// or this table will not be able to preallocate its id table properly.
+        /// TODO: remove this restriction.
+        /// </remarks>
         public RelationTable(TFromTable baseTable, TToTable relatedTable) : base(baseTable)
         {
             RelatedTable = relatedTable;

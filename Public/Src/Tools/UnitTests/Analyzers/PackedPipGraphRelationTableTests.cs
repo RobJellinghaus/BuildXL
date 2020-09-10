@@ -24,8 +24,9 @@ namespace Test.Tool.Analyzers
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
 
-            RelationTable<PipId, PipId, PipTable, PipTable> relationTable =
-                new RelationTable<PipId, PipId, PipTable, PipTable>(pipGraph.PipTable, pipGraph.PipTable);
+            pipGraph.ConstructRelationTables();
+
+            RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
 
             XAssert.AreEqual(0, relationTable[pipId]);
 
@@ -57,8 +58,9 @@ namespace Test.Tool.Analyzers
             XAssert.AreNotEqual(pipId, pipId3);
             XAssert.AreNotEqual(pipId2, pipId3);
 
-            RelationTable<PipId, PipId, PipTable, PipTable> relationTable =
-                new RelationTable<PipId, PipId, PipTable, PipTable>(pipGraph.PipTable, pipGraph.PipTable);
+            pipGraph.ConstructRelationTables();
+
+            RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
 
             XAssert.AreEqual(0, relationTable[pipId]);
 

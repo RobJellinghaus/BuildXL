@@ -85,7 +85,7 @@ namespace BuildXL.Execution.Analyzer
         {
             if (!Directory.Exists(OutputDirectoryPath))
             {
-                throw new ArgumentException($"Output directory {OutputDirectoryPath} does not exist");
+                Directory.CreateDirectory(OutputDirectoryPath);
             }
 
             PackedPipGraph pipGraph = new PackedPipGraph();
@@ -102,6 +102,9 @@ namespace BuildXL.Execution.Analyzer
             {
                 pipGraphIdList.Add(AddPip(pipList[i], pipBuilder, idMap));
             }
+
+            // Now that all pips are loaded, construct the PipDependencies RelationTable.
+            pipGraph.ConstructRelationTables();
 
             // and now do it again with the dependencies, now that everything is established.
             // Since we added all the pips in pipList order to PipTable, we can traverse them again in the same order
@@ -159,7 +162,9 @@ namespace BuildXL.Execution.Analyzer
             IEnumerable<G_PipId> pipDependencies = PipGraph
                 .RetrievePipReferenceImmediateDependencies(pipReference.PipId, null)
                 .Where(pipRef => pipRef.PipType != B_PipType.HashSourceFile)
-                .Select(pipRef => idMap[pipRef.PipId]);
+                .Select(pipRef => idMap[pipRef.PipId])
+                .Distinct()
+                .OrderBy(pid => pid);
 
             buffer.Clear();
             buffer.AddRange(pipDependencies);

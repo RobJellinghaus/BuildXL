@@ -34,27 +34,34 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// The dependency relation (from the dependent, towards the dependency).
         /// </summary>
-        public readonly RelationTable<PipId, PipId, PipTable, PipTable> PipDependencies;
+        public RelationTable<PipId, PipId, PipTable, PipTable> PipDependencies { get; private set; }
 
         /// <summary>
-        /// The dependent relation (from the dependency, towards the dependent).
+        /// Construct a PackedPipGraph with empty base tables.
         /// </summary>
         /// <remarks>
-        /// This relation is calculated as the inverse of the PipDependencies relation.
+        /// After creating these tables, create their Builders (inner classes) to populate them.
+        /// Note that calling ConstructRelationTables() is necessary after these are fully built,
+        /// before the relations can then be built.
         /// </remarks>
-        public readonly RelationTable<PipId, PipId, PipTable, PipTable> PipDependents;
-
         public PackedPipGraph()
         {
             StringTable = new StringTable();
             PipTable = new PipTable(StringTable);
             FileTable = new FileTable(StringTable);
-            PipDependencies = new RelationTable<PipId, PipId, PipTable, PipTable>(PipTable, PipTable);
         }
 
         private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.txt";
         private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
         private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
+
+        /// <summary>
+        /// After the base tables are populated, construct the (now properly sized) relation tables.
+        /// </summary>
+        public void ConstructRelationTables()
+        {
+            PipDependencies = new RelationTable<PipId, PipId, PipTable, PipTable>(PipTable, PipTable);
+        }
 
         public void SaveToDirectory(string directory)
         {
