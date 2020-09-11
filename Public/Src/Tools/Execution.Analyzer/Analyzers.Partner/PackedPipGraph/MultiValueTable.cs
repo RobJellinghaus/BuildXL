@@ -54,7 +54,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public MultiValueTable(ITable<TId> baseTable) : base(baseTable)
         {
-            Offsets = new SpannableList<int>(baseTable.Count);
+            Offsets = new SpannableList<int>(baseTable.Count == 0 ? DefaultCapacity : baseTable.Count);
             MultiValues = new SpannableList<TValue>();
         }
 
@@ -65,9 +65,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// This must be called after baseTable has been fully populated,
         /// or this table will not be able to preallocate its capacity.
         /// </remarks>
-        public MultiValueTable(int capacity = -1) : base(capacity)
+        public MultiValueTable(int capacity = DefaultCapacity) : base(capacity)
         {
-            capacity = capacity <= 0 ? DefaultCapacity : capacity;
             Offsets = new SpannableList<int>(capacity);
             MultiValues = new SpannableList<TValue>();
         }
@@ -145,7 +144,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public virtual TId Add(ReadOnlySpan<TValue> multiValues)
         {
-            if (Count > 0)
+            if (SingleValues.Count > 0)
             {
                 Offsets.Add(Offsets[Count - 1] + SingleValues[Count - 1]);
             }

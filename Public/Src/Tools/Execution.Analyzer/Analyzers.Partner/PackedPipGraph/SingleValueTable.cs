@@ -22,7 +22,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         where TId : unmanaged, Id<TId>
         where TValue : unmanaged
     {
-        public SingleValueTable(int capacity = -1) : base(capacity)
+        public SingleValueTable(int capacity = DefaultCapacity) : base(capacity)
         { }
 
         public SingleValueTable(ITable<TId> baseTable) : base(baseTable)
@@ -36,13 +36,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             get
             {
                 CheckValid(id);
-                EnsureCount();
                 return SingleValues[id.FromId() - 1];
             }
             set
             {
                 CheckValid(id);
-                EnsureCount();
                 SingleValues[id.FromId() - 1] = value;
             }
         }
@@ -50,12 +48,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Add the next value in the table.
         /// </summary>
-        /// <remarks>
-        /// Note that if this table has a BaseTableOpt defined, and any values are set via indexer,
-        /// then this table will effectively be filled with default values up to the set index.
-        /// This will then mean that Add calls here will be adding after that index. In general,
-        /// either use Add to assign values, or use the indexer, but not both.
-        /// </remarks>
         public TId Add(TValue value)
         {
             SingleValues.Add(value);

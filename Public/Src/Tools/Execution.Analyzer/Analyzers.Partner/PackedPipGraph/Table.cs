@@ -17,16 +17,17 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     {
         protected const int DefaultCapacity = 100;
 
-        public Table(int capacity = -1)
+        public Table(int capacity = DefaultCapacity)
         {
-            SingleValues = new SpannableList<TValue>(capacity == -1 ? DefaultCapacity : capacity);
+            if (capacity <= 0) { throw new ArgumentException($"Capacity {capacity} must be >= 0"); }
+            SingleValues = new SpannableList<TValue>(capacity);
         }
 
         public Table(ITable<TId> baseTable)
         {
             if (baseTable == null) { throw new ArgumentException("Base table must not be null"); }
             BaseTableOpt = baseTable;
-            SingleValues = new SpannableList<TValue>(baseTable.Count);
+            SingleValues = new SpannableList<TValue>(baseTable.Count == 0 ? DefaultCapacity : baseTable.Count);
         }
 
         /// <summary>
@@ -35,10 +36,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         protected SpannableList<TValue> SingleValues;
 
         /// <summary>
-        /// If this table has a BaseTableOpt, its Count and its IDs are determined by that base table,
-        /// and this table effectively has default / empty values for all IDs of its base table.
+        /// The number of IDs stored in this table.
         /// </summary>
-        public int Count => BaseTableOpt?.Count ?? SingleValues.Count;
+        public int Count => SingleValues.Count;
 
         /// <summary>
         /// Return the current range of defined IDs.
@@ -52,7 +52,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// The base table (if any) that defines this table's ID range.
         /// </summary>
         /// <remarks>
-        /// "Opt" signifies "optional".
+        /// "Opt" signifies "optional". All IDs added to this table must be within the ID range of BaseTableOpt, if it exists.
         /// </remarks>
         public ITable<TId> BaseTableOpt { get; private set; }
 
@@ -64,20 +64,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public void CheckValid(TId id)
         {
             if (!IsValid(id)) { throw new ArgumentException($"ID {id} is not valid for table with Count {Count}"); }
-        }
-
-        /// <summary>
-        /// Ensure this table stores at least as many elements as the base table.
-        /// </summary>
-        protected void EnsureCount()
-        {
-            if (BaseTableOpt != null)
-            {
-                if (Count > SingleValues.Count)
-                {
-                    SingleValues.AddRange(Enumerable.Repeat<TValue>(default, BaseTableOpt.Count - SingleValues.Count));
-                }
-            }
         }
 
         public virtual void SaveToFile(string directory, string name)

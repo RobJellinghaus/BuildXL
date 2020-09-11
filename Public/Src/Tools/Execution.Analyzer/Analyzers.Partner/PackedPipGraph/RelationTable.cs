@@ -94,7 +94,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             {
                 foreach (TToId relatedId in this[id])
                 {
-                    result.SingleValues[relatedId.FromId()]++;
+                    result.SingleValues[relatedId.FromId() - 1]++;
                     sum++;
                 }
             }

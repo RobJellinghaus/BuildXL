@@ -28,8 +28,6 @@ namespace Test.Tool.Analyzers
 
             RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
 
-            XAssert.AreEqual(0, relationTable[pipId].Length);
-
             relationTable.Add(new[] { pipId }.AsSpan());
 
             XAssert.AreEqual(1, relationTable[pipId].Length);
@@ -61,8 +59,6 @@ namespace Test.Tool.Analyzers
             pipGraph.ConstructRelationTables();
 
             RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
-
-            XAssert.AreEqual(0, relationTable[pipId].Length);
 
             relationTable.Add(new[] { pipId2, pipId3 }.AsSpan());
 
