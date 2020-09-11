@@ -31,9 +31,8 @@ namespace Test.Tool.Analyzers
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
-            XAssert.AreEqual(1, derivedTable.Count);
-            XAssert.AreEqual(1, derivedTable.Ids.Count());
-            XAssert.AreEqual(0, derivedTable[pipId]);
+            XAssert.AreEqual(0, derivedTable.Count);
+            XAssert.AreEqual(0, derivedTable.Ids.Count());
 
             derivedTable.Add(1000);
 
