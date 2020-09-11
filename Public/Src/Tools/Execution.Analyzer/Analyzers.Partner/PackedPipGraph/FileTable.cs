@@ -39,7 +39,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <remarks>
     /// Every single file in an XLG trace goes into this one table.
     /// </remarks>
-    public class FileTable : BaseUnmanagedTable<FileId, FileEntry>
+    public class FileTable : SingleValueTable<FileId, FileEntry>
     {
         /// <summary>
         /// The names of files in this FileTable.
@@ -57,13 +57,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public override void SaveToFile(string directory, string name)
         {
             base.SaveToFile(directory, name);
-            FileNameTable.SaveToFile(directory, $"{nameof(FileNameTable)}.{name}");
+            FileNameTable.SaveToFile(directory, InsertSuffix(name, nameof(FileNameTable)));
         }
 
         public override void LoadFromFile(string directory, string name)
         {
             base.LoadFromFile(directory, name);
-            FileNameTable.LoadFromFile(directory, $"{nameof(FileNameTable)}.{name}");
+            FileNameTable.LoadFromFile(directory, InsertSuffix(name, nameof(FileNameTable)));
         }
 
         public class CachingBuilder : CachingBuilder<FileEntry.EqualityComparer>

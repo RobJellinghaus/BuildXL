@@ -53,7 +53,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// The intent is to optimize the representation of long, sequential names which have many repeated subparts.
     /// Both file paths and pip names fit this description, and this type is used for both.
     /// </remarks>
-    public class NameTable : BaseUnmanagedTable<NameId, NameEntry>
+    public class NameTable : SingleValueTable<NameId, NameEntry>
     {
         /// <summary>
         /// The separator between parts of names in this table.
@@ -130,8 +130,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 // we're at the start -- base case of the recursion
                 prefixSpan = span.Slice(0, 0);
             }
-            string atom = StringTable[entry.Atom];
-            atom.AsSpan().CopyTo(span.Slice(prefixSpan.Length));
+            ReadOnlySpan<char> atom = StringTable[entry.Atom];
+            atom.CopyTo(span.Slice(prefixSpan.Length));
             return span.Slice(0, prefixSpan.Length + atom.Length);
         }
 

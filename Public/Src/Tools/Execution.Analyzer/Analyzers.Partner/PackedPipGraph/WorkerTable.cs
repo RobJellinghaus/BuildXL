@@ -26,7 +26,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <remarks>
     /// The StringId value is the worker's MachineName.
     /// </remarks>
-    public class WorkerTable : BaseUnmanagedTable<WorkerId, StringId>
+    public class WorkerTable : SingleValueTable<WorkerId, StringId>
     {
         /// <summary>
         /// The table containing the strings referenced by this WorkerTable.

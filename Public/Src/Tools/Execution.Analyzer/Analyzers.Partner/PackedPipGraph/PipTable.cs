@@ -123,7 +123,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <summary>
     /// Table of pip data.
     /// </summary>
-    public class PipTable : BaseUnmanagedTable<PipId, PipEntry>
+    public class PipTable : SingleValueTable<PipId, PipEntry>
     {
         /// <summary>
         /// The names of pips in this table.
@@ -150,11 +150,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             PipNameTable.LoadFromFile(directory, $"{nameof(PipNameTable)}.{name}");
         }
 
-        public class CachingBuilder : CachingBuilder<PipEntry.EqualityComparer>
+        public class Builder : CachingBuilder<PipEntry.EqualityComparer>
         {
             public readonly NameTable.Builder NameTableBuilder;
 
-            public CachingBuilder(PipTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
+            public Builder(PipTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
             {
                 NameTableBuilder = new NameTable.Builder(table.PipNameTable, stringTableBuilder);
             }
@@ -166,17 +166,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                     NameTableBuilder.GetOrAdd(name),
                     pipType);
 
-                ((PipTable)ValueTable).Values.Add(entry);
-                return new PipId(ValueTable.Count);
-            }
-
-            public PipId GetOrAdd(string hash, string pipName, PipType pipType)
-            {
-                PipEntry entry = new PipEntry(
-                    NameTableBuilder.StringTableBuilder.GetOrAdd(hash),
-                    NameTableBuilder.GetOrAdd(pipName),
-                    pipType);
-                return GetOrAdd(entry);
+                return ((PipTable)ValueTable).Add(entry);
             }
         }
     }
