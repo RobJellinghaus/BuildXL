@@ -84,13 +84,19 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             base.SaveToFile(directory, name);
             // we don't need to save m_offsets since it is calculated from the counts in SingleValues
-            FileSpanUtilities.SaveToFile(directory, InsertSuffix(name, "MultiValue"), MultiValues);;
+            FileSpanUtilities.SaveToFile(directory, InsertSuffix(name, "MultiValue"), MultiValues);
         }
 
         public override void LoadFromFile(string directory, string name)
         {
+            Offsets.Clear();
+            MultiValues.Clear();
+
             base.LoadFromFile(directory, name);
+
             FileSpanUtilities.LoadFromFile(directory, InsertSuffix(name, "MultiValue"), MultiValues);
+
+            Offsets.Fill(Count, default);
             CalculateOffsets();
         }
 

@@ -19,8 +19,6 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void StringTable_can_store_one_element()
         {
-            System.Diagnostics.Debugger.Launch();
-
             StringTable stringTable = new StringTable();
             StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 

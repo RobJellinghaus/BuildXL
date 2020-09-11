@@ -36,6 +36,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 reader.Read(MemoryMarshal.Cast<int, byte>(new Span<int>(lengthBuf)));
                 int length = lengthBuf[0];
 
+                values.Capacity = length;
                 values.Fill(length, default);
 
                 Span<TValue> valueSpan = values.AsSpan();

@@ -87,7 +87,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         public virtual void LoadFromFile(string directory, string name)
         {
-            FileSpanUtilities.SaveToFile(directory, name, SingleValues);
+            FileSpanUtilities.LoadFromFile(directory, name, SingleValues);
         }
 
         /// <summary>
