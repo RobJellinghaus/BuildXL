@@ -141,13 +141,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public override void SaveToFile(string directory, string name)
         {
             base.SaveToFile(directory, name);
-            PipNameTable.SaveToFile(directory, $"{nameof(PipNameTable)}.{name}");
+            PipNameTable.SaveToFile(directory, InsertSuffix(name, nameof(PipNameTable)));
         }
 
         public override void LoadFromFile(string directory, string name)
         {
             base.LoadFromFile(directory, name);
-            PipNameTable.LoadFromFile(directory, $"{nameof(PipNameTable)}.{name}");
+            PipNameTable.LoadFromFile(directory, InsertSuffix(name, nameof(PipNameTable)));
         }
 
         public class Builder : CachingBuilder<PipEntry.EqualityComparer>

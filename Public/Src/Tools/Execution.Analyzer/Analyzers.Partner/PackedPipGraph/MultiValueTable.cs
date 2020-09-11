@@ -139,7 +139,15 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </remarks>
         public virtual TId Add(ReadOnlySpan<TValue> multiValues)
         {
-            Offsets.Add(Offsets[Count - 1] + SingleValues[Count - 1]);
+            if (Count > 0)
+            {
+                Offsets.Add(Offsets[Count - 1] + SingleValues[Count - 1]);
+            }
+            else
+            {
+                Offsets.Add(0);
+            }
+
             SingleValues.Add(multiValues.Length);
 
             MultiValues.AddRange(multiValues);

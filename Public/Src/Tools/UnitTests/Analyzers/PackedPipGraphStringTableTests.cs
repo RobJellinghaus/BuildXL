@@ -19,6 +19,8 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void StringTable_can_store_one_element()
         {
+            System.Diagnostics.Debugger.Launch();
+
             StringTable stringTable = new StringTable();
             StringTable.CachingBuilder builder = new StringTable.CachingBuilder(stringTable);
 
@@ -26,7 +28,7 @@ namespace Test.Tool.Analyzers
             StringId id2 = builder.GetOrAdd("a");
             XAssert.IsTrue(id.Equals(id2));
             XAssert.IsFalse(id.Equals(default));
-            XAssert.AreEqual("a", stringTable[id]);
+            XAssert.AreEqual("a", new string(stringTable[id]));
             XAssert.AreEqual(1, stringTable.Count);
             XAssert.AreEqual(1, stringTable.Ids.Count());
         }
@@ -40,7 +42,7 @@ namespace Test.Tool.Analyzers
             StringId id = builder.GetOrAdd("a");
             StringId id2 = builder.GetOrAdd("b");
             XAssert.IsFalse(id.Equals(id2));
-            XAssert.AreEqual("b", stringTable[id2]);
+            XAssert.AreEqual("b", new string(stringTable[id2]));
             XAssert.AreEqual(2, stringTable.Count);
             XAssert.AreEqual(2, stringTable.Ids.Count());
         }
@@ -62,7 +64,7 @@ namespace Test.Tool.Analyzers
             XAssert.AreEqual(stringTable.Count, stringTable2.Count);
             foreach (StringId id in stringTable.Ids)
             {
-                XAssert.AreEqual(stringTable[id], stringTable2[id]);
+                XAssert.AreEqual(new string(stringTable[id]), new string(stringTable2[id]));
             }
         }
     }

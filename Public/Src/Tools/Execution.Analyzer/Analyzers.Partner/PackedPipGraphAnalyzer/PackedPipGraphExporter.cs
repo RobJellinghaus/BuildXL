@@ -90,7 +90,7 @@ namespace BuildXL.Execution.Analyzer
 
             PackedPipGraph pipGraph = new PackedPipGraph();
             G_StringTable.CachingBuilder stringBuilder = new G_StringTable.CachingBuilder(pipGraph.StringTable);
-            G_PipTable.CachingBuilder pipBuilder = new G_PipTable.CachingBuilder(pipGraph.PipTable, stringBuilder);
+            G_PipTable.Builder pipBuilder = new G_PipTable.Builder(pipGraph.PipTable, stringBuilder);
 
             List<PipReference> pipList =
                 PipGraph.AsPipReferences(PipTable.StableKeys, PipQueryContext.PipGraphRetrieveAllPips).ToList();
@@ -132,7 +132,7 @@ namespace BuildXL.Execution.Analyzer
         /// <summary>
         /// Add this pip's informationn to the graph.
         /// </summary>
-        public G_PipId AddPip(PipReference pipReference, G_PipTable.CachingBuilder pipBuilder)
+        public G_PipId AddPip(PipReference pipReference, G_PipTable.Builder pipBuilder)
         {
             Pip pip = pipReference.HydratePip();
             string pipName = GetDescription(pip).Replace(", ", ".");
@@ -169,7 +169,7 @@ namespace BuildXL.Execution.Analyzer
 
             buffer.Clear();
             buffer.AddRange(pipDependencies);
-            relationTable.AddRelations(g_pipId, buffer.AsSpan());
+            relationTable.Add(buffer.AsSpan());
         }
 
         // These are all copied from CosineDumpPip and are not yet used by this analyzer; as we extend PackedPipGraph to capture more of this,

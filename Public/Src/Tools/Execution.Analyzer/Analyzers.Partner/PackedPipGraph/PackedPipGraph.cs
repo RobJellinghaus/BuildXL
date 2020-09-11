@@ -81,19 +81,19 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             public readonly PackedPipGraph PipGraph;
             public readonly StringTable.CachingBuilder StringTableBuilder;
-            public readonly PipTable.CachingBuilder PipTableBuilder;
+            public readonly PipTable.Builder PipTableBuilder;
             public readonly FileTable.CachingBuilder FileTableBuilder;
 
             public Builder(PackedPipGraph pipGraph)
             {
                 PipGraph = pipGraph;
                 StringTableBuilder = new StringTable.CachingBuilder(PipGraph.StringTable);
-                PipTableBuilder = new PipTable.CachingBuilder(PipGraph.PipTable, StringTableBuilder);
+                PipTableBuilder = new PipTable.Builder(PipGraph.PipTable, StringTableBuilder);
                 FileTableBuilder = new FileTable.CachingBuilder(PipGraph.FileTable, StringTableBuilder);
             }
 
-            public PipId GetOrAddPip(string hash, string name, PipType pipType)
-                => PipTableBuilder.GetOrAdd(hash, name, pipType);
+            public PipId Add(string hash, string name, PipType pipType)
+                => PipTableBuilder.Add(hash, name, pipType);
 
             public FileId GetOrAddFile(string name, long sizeInBytes)
                 => FileTableBuilder.GetOrAdd(name, sizeInBytes);

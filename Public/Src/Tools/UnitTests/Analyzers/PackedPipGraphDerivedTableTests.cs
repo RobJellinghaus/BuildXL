@@ -20,7 +20,7 @@ namespace Test.Tool.Analyzers
         public void DerivedTable_can_store_one_element()
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
-            DerivedTable<PipId, int, PipTable> derivedTable = new DerivedTable<PipId, int, PipTable>(pipGraph.PipTable);
+            SingleValueTable<PipId, int> derivedTable = new SingleValueTable<PipId, int>(pipGraph.PipTable);
 
             XAssert.AreEqual(0, derivedTable.Count);
             XAssert.AreEqual(0, derivedTable.Ids.Count());
@@ -29,13 +29,13 @@ namespace Test.Tool.Analyzers
 
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
+            PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, derivedTable.Count);
             XAssert.AreEqual(1, derivedTable.Ids.Count());
             XAssert.AreEqual(0, derivedTable[pipId]);
 
-            derivedTable.Set(pipId, 1000);
+            derivedTable[pipId] = 1000;
 
             XAssert.AreEqual(1, derivedTable.Count);
             XAssert.AreEqual(1, derivedTable.Ids.Count());
@@ -46,18 +46,18 @@ namespace Test.Tool.Analyzers
         public void DerivedTable_can_save_and_load()
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
-            DerivedTable<PipId, int, PipTable> derivedTable = new DerivedTable<PipId, int, PipTable>(pipGraph.PipTable);
+            SingleValueTable<PipId, int> derivedTable = new SingleValueTable<PipId, int>(pipGraph.PipTable);
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
 
             string hash = "PipHash";
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.GetOrAdd(hash, name, PipType.Process);
+            PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
-            derivedTable.Set(pipId, 1000);
+            derivedTable[pipId] = 1000;
 
             derivedTable.SaveToFile(TemporaryDirectory, "PipInt.bin");
 
-            DerivedTable<PipId, int, PipTable> derivedTable2 = new DerivedTable<PipId, int, PipTable>(pipGraph.PipTable);
+            SingleValueTable<PipId, int> derivedTable2 = new SingleValueTable<PipId, int>(pipGraph.PipTable);
             derivedTable2.LoadFromFile(TemporaryDirectory, "PipInt.bin");
 
             XAssert.AreEqual(1, derivedTable2.Count);
