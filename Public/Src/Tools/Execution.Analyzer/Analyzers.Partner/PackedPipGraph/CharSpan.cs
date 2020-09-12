@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using BuildXL.Execution.Analyzer.JPath;
-using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {

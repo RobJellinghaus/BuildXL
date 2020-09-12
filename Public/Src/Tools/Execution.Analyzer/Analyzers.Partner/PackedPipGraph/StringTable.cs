@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -20,12 +19,6 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public override string ToString() => $"StringId[{Value}]";
         public bool Equals([AllowNull] StringId x, [AllowNull] StringId y) => x.Value == y.Value;
         public int GetHashCode([DisallowNull] StringId obj) => obj.Value;
-    }
-
-    public struct StringComparerNonNull : IEqualityComparer<string>
-    {
-        public bool Equals([AllowNull] string x, [AllowNull] string y) => StringComparer.InvariantCulture.Equals(x, y);
-        public int GetHashCode([DisallowNull] string obj) => StringComparer.InvariantCulture.GetHashCode(obj);
     }
 
     /// <summary>

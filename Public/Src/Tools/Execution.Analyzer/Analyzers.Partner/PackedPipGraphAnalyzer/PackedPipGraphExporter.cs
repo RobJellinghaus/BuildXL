@@ -73,12 +73,12 @@ namespace BuildXL.Execution.Analyzer
     /// </remarks>
     public sealed class PackedPipGraphExporter : Analyzer
     {
-        private readonly string OutputDirectoryPath;
+        private readonly string m_outputDirectoryPath;
 
         public PackedPipGraphExporter(AnalysisInput input, string outputDirectoryPath)
             : base(input)
         {
-            OutputDirectoryPath = outputDirectoryPath;
+            m_outputDirectoryPath = outputDirectoryPath;
 
             Console.WriteLine($"PackedPipGraphExporter: Constructed at {DateTime.Now}.");
         }
@@ -87,9 +87,9 @@ namespace BuildXL.Execution.Analyzer
         {
             Console.WriteLine($"PackedPipGraphExporter: Starting export at {DateTime.Now}.");
 
-            if (!Directory.Exists(OutputDirectoryPath))
+            if (!Directory.Exists(m_outputDirectoryPath))
             {
-                Directory.CreateDirectory(OutputDirectoryPath);
+                Directory.CreateDirectory(m_outputDirectoryPath);
             }
 
             PackedPipGraph pipGraph = new PackedPipGraph();
@@ -132,7 +132,7 @@ namespace BuildXL.Execution.Analyzer
             Console.WriteLine($"PackedPipGraphExporter: Added {pipGraph.PipDependencies.MultiValueCount} total dependencies at {DateTime.Now}.");
 
             // and write it out
-            pipGraph.SaveToDirectory(OutputDirectoryPath);
+            pipGraph.SaveToDirectory(m_outputDirectoryPath);
 
             Console.WriteLine($"PackedPipGraphExporter: Wrote out pip graph at {DateTime.Now}.");
 
@@ -146,6 +146,15 @@ namespace BuildXL.Execution.Analyzer
         {
             Pip pip = pipReference.HydratePip();
             string pipName = GetDescription(pip).Replace(", ", ".");
+            // strip the pip hash from the start of the description
+            if (pipName.StartsWith("Pip"))
+            {
+                int firstDotIndex = pipName.IndexOf('.');
+                if (firstDotIndex != -1)
+                {
+                    pipName = pipName.Substring(firstDotIndex + 1);
+                }
+            }
             G_PipType pipType = (G_PipType)(int)pip.PipType;
 
             G_PipId g_pipId = pipBuilder.Add(pip.SemiStableHash, pipName, pipType);

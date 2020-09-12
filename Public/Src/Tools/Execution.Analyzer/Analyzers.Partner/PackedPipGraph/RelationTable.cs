@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using BuildXL.ToolSupport;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {

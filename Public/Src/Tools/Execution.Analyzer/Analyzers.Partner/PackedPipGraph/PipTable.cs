@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -147,6 +146,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         {
             base.LoadFromFile(directory, name);
             PipNameTable.LoadFromFile(directory, InsertSuffix(name, nameof(PipNameTable)));
+        }
+
+        public string PipName(PipId pipId)
+        {
+            return PipNameTable.GetText(this[pipId].Name);
         }
 
         public class Builder : CachingBuilder<PipEntry.EqualityComparer>
