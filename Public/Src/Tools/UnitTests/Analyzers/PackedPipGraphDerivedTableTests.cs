@@ -27,7 +27,7 @@ namespace Test.Tool.Analyzers
 
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
 
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
@@ -48,7 +48,7 @@ namespace Test.Tool.Analyzers
             SingleValueTable<PipId, int> derivedTable = new SingleValueTable<PipId, int>(pipGraph.PipTable);
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
 
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 

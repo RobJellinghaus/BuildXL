@@ -87,11 +87,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Semi-stable hash.
         /// </summary>
-        /// <remarks>
-        /// Turns out this is not a very useful unique key when exporting a pip table;
-        /// module pips and others all have hash 0.
-        /// </remarks>
-        public readonly StringId Hash;
+        public readonly long SemiStableHash;
 
         /// <summary>
         /// Full name.
@@ -104,19 +100,22 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public readonly PipType PipType;
 
         public PipEntry(
-            StringId hash,
+            long semiStableHash,
             NameId name,
             PipType type)
         { 
-            Hash = hash; 
+            SemiStableHash = semiStableHash; 
             Name = name;
             PipType = type;
         }
 
+        /// <summary>
+        /// Compare PipEntries by SemiStableHash value.
+        /// </summary>
         public struct EqualityComparer : IEqualityComparer<PipEntry>
         {
-            public bool Equals(PipEntry x, PipEntry y) => x.Hash.Equals(y.Hash);
-            public int GetHashCode([DisallowNull] PipEntry obj) => obj.Hash.GetHashCode();
+            public bool Equals(PipEntry x, PipEntry y) => x.SemiStableHash.Equals(y.SemiStableHash);
+            public int GetHashCode([DisallowNull] PipEntry obj) => obj.SemiStableHash.GetHashCode();
         }
     }
 
@@ -159,10 +158,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 NameTableBuilder = new NameTable.Builder(table.PipNameTable, stringTableBuilder);
             }
 
-            public PipId Add(string hash, string name, PipType pipType)
+            /// <summary>
+            /// Add a pip, when you are sure it's not already in the table.
+            /// </summary>
+            public PipId Add(long semiStableHash, string name, PipType pipType)
             {
                 PipEntry entry = new PipEntry(
-                    NameTableBuilder.StringTableBuilder.GetOrAdd(hash),
+                    semiStableHash,
                     NameTableBuilder.GetOrAdd(name),
                     pipType);
 

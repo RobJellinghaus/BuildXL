@@ -20,7 +20,7 @@ namespace Test.Tool.Analyzers
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
@@ -46,11 +46,11 @@ namespace Test.Tool.Analyzers
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
-            PipId pipId2 = pipGraphBuilder.PipTableBuilder.Add($"{hash}2", $"{name}2", PipType.Process);
-            PipId pipId3 = pipGraphBuilder.PipTableBuilder.Add($"{hash}3", $"{name}3", PipType.Process);
+            PipId pipId2 = pipGraphBuilder.PipTableBuilder.Add(hash + 1, $"{name}2", PipType.Process);
+            PipId pipId3 = pipGraphBuilder.PipTableBuilder.Add(hash + 2, $"{name}3", PipType.Process);
 
             XAssert.AreNotEqual(pipId, pipId2);
             XAssert.AreNotEqual(pipId, pipId3);

@@ -103,7 +103,7 @@ namespace BuildXL.Execution.Analyzer
             for (int i = 0; i < pipList.Count; i++)
             {
                 // Each pip gets a G_PipId that is one plus its index in this list, since zero is never a PackedPipGraph ID value.
-                // This is observed to be exactly the same as the B_PipId, so we make sure!
+                // This seems to be exactly how B_PipId works as well, but we verify to be sure we can rely on this invariant.
                 G_PipId graphPipId = AddPip(pipList[i], pipBuilder);
                 if (graphPipId.Value != pipList[i].PipId.Value)
                 {
@@ -148,7 +148,7 @@ namespace BuildXL.Execution.Analyzer
             string pipName = GetDescription(pip).Replace(", ", ".");
             G_PipType pipType = (G_PipType)(int)pip.PipType;
 
-            G_PipId g_pipId = pipBuilder.Add(pip.FormattedSemiStableHash, pipName, pipType);
+            G_PipId g_pipId = pipBuilder.Add(pip.SemiStableHash, pipName, pipType);
 
             return g_pipId;
 

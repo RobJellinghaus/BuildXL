@@ -105,8 +105,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 FileTableBuilder = new FileTable.CachingBuilder(PipGraph.FileTable, StringTableBuilder);
             }
 
-            public PipId Add(string hash, string name, PipType pipType)
-                => PipTableBuilder.Add(hash, name, pipType);
+            public PipId Add(long semiStableHash, string name, PipType pipType)
+                => PipTableBuilder.Add(semiStableHash, name, pipType);
 
             public FileId GetOrAddFile(string name, long sizeInBytes)
                 => FileTableBuilder.GetOrAdd(name, sizeInBytes);

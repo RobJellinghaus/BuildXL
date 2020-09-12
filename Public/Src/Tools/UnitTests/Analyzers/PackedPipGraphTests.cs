@@ -32,16 +32,16 @@ namespace Test.Tool.Analyzers
             PackedPipGraph pipGraph = new PackedPipGraph();
             PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
 
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";            
             PipId id = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, pipGraph.PipTable.Count);
             XAssert.AreEqual(0, pipGraph.FileTable.Count);
-            XAssert.AreEqual(5, pipGraph.StringTable.Count);
+            XAssert.AreEqual(4, pipGraph.StringTable.Count);
 
             PipEntry entry = pipGraph.PipTable[id];
-            XAssert.AreEqual(hash, new string(pipGraph.StringTable[entry.Hash]));
+            XAssert.AreEqual(hash, entry.SemiStableHash);
             XAssert.AreEqual(name, pipGraph.PipTable.PipNameTable.GetText(entry.Name));
         }
 
@@ -69,13 +69,13 @@ namespace Test.Tool.Analyzers
 
             string path = "d:\\os\\bin\\shellcommon\\shell\\merged\\winmetadata\\appresolverux.winmd";
             pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024);
-            string hash = "PipHash";
+            long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, pipGraph.PipTable.Count);
             XAssert.AreEqual(1, pipGraph.FileTable.Count);
-            XAssert.AreEqual(13, pipGraph.StringTable.Count);
+            XAssert.AreEqual(12, pipGraph.StringTable.Count);
 
             pipGraph.SaveToDirectory(TemporaryDirectory);
 
@@ -84,7 +84,8 @@ namespace Test.Tool.Analyzers
 
             XAssert.AreEqual(1, pipGraph2.PipTable.Count);
             XAssert.AreEqual(1, pipGraph2.FileTable.Count);
-            XAssert.AreEqual(13, pipGraph2.StringTable.Count);
+            XAssert.AreEqual(12, pipGraph2.StringTable.Count);
+
             FileId fileId = pipGraph2.FileTable.Ids.First();
             XAssert.AreEqual(path, pipGraph2.FileTable.FileNameTable.GetText(pipGraph2.FileTable[fileId].Name));
             PipId pipId = pipGraph2.PipTable.Ids.First();
