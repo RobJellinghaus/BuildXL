@@ -7,6 +7,12 @@ using System.Runtime.InteropServices;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
+    /// <summary>
+    /// Generic Span[T] methods for saving and loading spans of unmanaged values.
+    /// </summary>
+    /// <remarks>
+    /// Actually amazingly high-performance, given how convenient and generic the code pattern is.
+    /// </remarks>
     public static class FileSpanUtilities
     {
         public static void SaveToFile<TValue>(string directory, string name, SpannableList<TValue> values)

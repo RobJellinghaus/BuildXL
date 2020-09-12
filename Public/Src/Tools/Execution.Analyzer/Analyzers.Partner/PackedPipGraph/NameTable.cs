@@ -14,7 +14,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public struct NameId : Id<NameId>
     {
         internal readonly int Value;
-        internal NameId(int value) { Value = value; }
+        internal NameId(int value) { Id<NameId>.CheckNotZero(value); Value = value; }
         int Id<NameId>.FromId() => Value;
         NameId Id<NameId>.ToId(int value) => new NameId(value);
         public bool Equals(NameId other) => Value == other.Value;
@@ -88,9 +88,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             NameEntry entry;
             while (!atEnd)
             {
+                // Walk up the prefix chain to the end.
                 entry = this[id];
                 if (entry.Atom.Equals(default)) { throw new Exception($"Invalid atom for id {entry.Atom}"); }
 
+                // Are we at the end yet?
                 atEnd = entry.Prefix.Equals(default);
 
                 len += StringTable[entry.Atom].Length;
@@ -159,6 +161,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             private NameTable NameTable => (NameTable)ValueTable;
             public readonly StringTable.CachingBuilder StringTableBuilder;
 
+            private static bool CharComparer(char c1, char c2) => c1 == c2;
+
             /// <summary>
             /// Split this string into its constituent pieces and ensure it exists as a Name.
             /// </summary>
@@ -168,18 +172,31 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             /// </remarks>
             public NameId GetOrAdd(string s)
             {
-                string[] pieces = s.Split(NameTable.Separator, System.StringSplitOptions.RemoveEmptyEntries);
-
                 NameId prefixId = default;
-                foreach (string p in pieces)
+                ReadOnlySpan<char> span = s.AsSpan();
+                // Index relative to the start of the whole string.
+                int start = 0;
+                while (span.Length > 0)
                 {
-                    StringId atomId = StringTableBuilder.GetOrAdd(p);
+                    // Get the next atom (without allocating).
+                    ReadOnlySpan<char> nextAtom = span.SplitPrefix(NameTable.Separator, CharComparer);
+
+                    // Look up the next atom and add it to the string table
+                    // (allocating only if we're expanding the string table's backing store).
+                    StringId atomId = StringTableBuilder.GetOrAdd(new CharSpan(s, start, nextAtom.Length));
+
                     // if this prefix/atom pair already exists, we will get the ID of the current version,
                     // hence sharing it. Otherwise, we'll make a new entry and get a new ID for it.
                     // Either way, we'll then iterate, using the ID (current or new) as the prefix for
                     // the next piece.
                     prefixId = GetOrAdd(new NameEntry(prefixId, atomId));
+
+                    // Advance span past the separator (if we're not at the end).
+                    int nextIndex = nextAtom.Length == span.Length ? nextAtom.Length : nextAtom.Length + 1;
+                    span = span.Slice(nextIndex);
+                    start += nextIndex;
                 }
+
                 // The ID we wind up with is the ID of the entire name.
                 return prefixId;
             }

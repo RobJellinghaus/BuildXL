@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
@@ -51,9 +52,10 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             FileTable = new FileTable(StringTable);
         }
 
-        private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.txt";
+        private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.bin";
         private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
         private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
+        private static readonly string s_pipDependenciesFileName = $"{nameof(PipDependencies)}.bin";
 
         /// <summary>
         /// After the base tables are populated, construct the (now properly sized) relation tables.
@@ -68,6 +70,11 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable.SaveToFile(directory, s_stringTableFileName);
             PipTable.SaveToFile(directory, s_pipTableFileName);
             FileTable.SaveToFile(directory, s_fileTableFileName);
+
+            if (PipDependencies != null)
+            {
+                PipDependencies.SaveToFile(directory, s_pipDependenciesFileName);
+            }
         }
 
         public void LoadFromDirectory(string directory)
@@ -75,6 +82,12 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable.LoadFromFile(directory, s_stringTableFileName);
             PipTable.LoadFromFile(directory, s_pipTableFileName);
             FileTable.LoadFromFile(directory, s_fileTableFileName);
+
+            if (File.Exists(Path.Combine(directory, s_pipDependenciesFileName)))
+            {
+                ConstructRelationTables();
+                PipDependencies.LoadFromFile(directory, s_pipDependenciesFileName);
+            }
         }
 
         public class Builder

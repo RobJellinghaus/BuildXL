@@ -14,7 +14,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public struct StringId : Id<StringId>, IEqualityComparer<StringId>
     {
         public readonly int Value;
-        public StringId(int value) { Value = value; }
+        public StringId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
         int Id<StringId>.FromId() => Value;
         StringId Id<StringId>.ToId(int value) => new StringId(value);
         public override string ToString() => $"StringId[{Value}]";
@@ -82,33 +82,41 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             /// <remarks>
             /// This is really only necessary when building the table, and should probably be split out into a builder type.
             /// </remarks>
-            private readonly Dictionary<string, StringId> m_entries = new Dictionary<string, StringId>();
+            private readonly Dictionary<CharSpan, StringId> m_entries;
 
-            private readonly MultiValueTable<StringId, char> m_valueTable;
+            private readonly StringTable m_stringTable;
 
-            internal CachingBuilder(MultiValueTable<StringId, char> valueTable)
+            internal CachingBuilder(StringTable stringTable)
             {
-                m_valueTable = valueTable;
+                m_stringTable = stringTable;
+                m_entries = new Dictionary<CharSpan, StringId>(new CharSpan.EqualityComparer(stringTable));
                 // Prepopulate the dictionary that does the caching
-                foreach (StringId id in m_valueTable.Ids)
+                foreach (StringId id in m_stringTable.Ids)
                 {
-                    m_entries.Add(new string(m_valueTable[id]), id);
+                    m_entries.Add(new CharSpan(id), id);
                 }
             }
 
-            public virtual StringId GetOrAdd(ReadOnlySpan<char> value)
+            public StringId GetOrAdd(string s) => GetOrAdd(new CharSpan(s));
+
+            /// <summary>
+            /// Get or add this value to the StringTable.
+            /// </summary>
+            /// <remarks>
+            /// The CharSpan type lets us refer to a slice of an underlying string (to allow splitting strings without allocating).
+            /// </remarks>
+            public virtual StringId GetOrAdd(CharSpan value)
             {
-                // Making strings here is quite expensive, but avoiding it would require building some kind of
-                // span-based dictionary, and this will work correctly and be sufficiently fast.
-                string valueString = new string(value);
-                if (m_entries.TryGetValue(valueString, out StringId id))
+                if (m_entries.TryGetValue(value, out StringId id))
                 {
                     return id;
                 }
                 else
                 {
-                    id = m_valueTable.Add(value);
-                    m_entries.Add(valueString, id);
+                    id = m_stringTable.Add(value.AsSpan(m_stringTable));
+                    // and add the entry as a reference to our own backing store, not the one passed in 
+                    // (since the value passed in is probably holding onto part of an actual string)
+                    m_entries.Add(new CharSpan(id), id);
                     return id;
                 }
             }

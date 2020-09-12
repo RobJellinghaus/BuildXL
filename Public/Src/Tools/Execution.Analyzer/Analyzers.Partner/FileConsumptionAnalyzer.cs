@@ -103,6 +103,8 @@ namespace BuildXL.Execution.Analyzer
             m_fileSizes = new Dictionary<AbsolutePath, long>();
             m_parentOutputDirectory = new MultiValueDictionary<AbsolutePath, DirectoryArtifact>();
             m_producedFiles = new ConcurrentDictionary<AbsolutePath, OutputFile>();
+
+            Console.WriteLine($"FileConsumptionAnalyzer: Constructed at {DateTime.Now}.");
         }
 
         public override void Prepare()
@@ -175,7 +177,7 @@ namespace BuildXL.Execution.Analyzer
 
         public override int Analyze()
         {
-            Console.WriteLine($"Analyzing");
+            Console.WriteLine($"FileConsumptionAnalyzer: Starting analysis at {DateTime.Now}.");
 
             Parallel.ForEach(
                 m_executedProcessPips.Keys,
@@ -260,6 +262,8 @@ namespace BuildXL.Execution.Analyzer
                     }
                 });
 
+            Console.WriteLine($"FileConsumptionAnalyzer: Analyzed {m_executedProcessPips.Count} executed process pips at {DateTime.Now}.");
+
             // set file producer
             Parallel.ForEach(
                 m_producedFiles.Keys,
@@ -288,6 +292,8 @@ namespace BuildXL.Execution.Analyzer
 
                     outputFile.Producer = producer;
                 });
+
+            Console.WriteLine($"FileConsumptionAnalyzer: Analyzed {m_producedFiles.Count} produced files at {DateTime.Now}.");
 
             foreach (var worker in m_workers)
             {
@@ -323,6 +329,8 @@ namespace BuildXL.Execution.Analyzer
                     pip.ConsumedInputSize,
                     pip.DeclaredInputSize);
             }
+
+            Console.WriteLine($"FileConsumptionAnalyzer: Wrote out all CSV files at {DateTime.Now}.");
 
             return 0;
         }

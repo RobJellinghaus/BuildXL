@@ -6,23 +6,6 @@ using System.Collections.Generic;
 namespace BuildXL.Execution.Analyzers.PackedPipGraph
 {
     /// <summary>
-    /// Interface implemented by ID types, to enable generic conversion to and from int.
-    /// </summary>
-    /// <remarks>
-    /// Theoretically, thanks to generic specialization, these methods should be callable with zero overhead
-    /// (no boxing, no virtual calls).
-    /// 
-    /// Note that the default ID value (e.g. 0) is never a valid ID. This is a deliberate decision to ensure that
-    /// default-initialized data never gets mistaken for an actual ID.
-    /// </remarks>
-    public interface Id<TId>
-        where TId : unmanaged
-    {
-        public int FromId();
-        public TId ToId(int value);
-    }
-
-    /// <summary>
     /// An ITable defines an ID space for its elements.
     /// </summary>
     /// <remarks>

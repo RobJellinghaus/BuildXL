@@ -12,7 +12,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public struct FileId : Id<FileId>, IEqualityComparer<FileId>
     {
         public readonly int Value;
-        public FileId(int value) { Value = value; }
+        public FileId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
         int Id<FileId>.FromId() => Value;
         FileId Id<FileId>.ToId(int value) => new FileId(value);
         public override string ToString() => $"FileId[{Value}]";

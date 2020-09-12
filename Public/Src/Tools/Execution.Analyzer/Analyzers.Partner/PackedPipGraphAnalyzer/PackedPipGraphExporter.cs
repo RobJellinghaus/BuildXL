@@ -79,10 +79,14 @@ namespace BuildXL.Execution.Analyzer
             : base(input)
         {
             OutputDirectoryPath = outputDirectoryPath;
+
+            Console.WriteLine($"PackedPipGraphExporter: Constructed at {DateTime.Now}.");
         }
 
         public override int Analyze()
         {
+            Console.WriteLine($"PackedPipGraphExporter: Starting export at {DateTime.Now}.");
+
             if (!Directory.Exists(OutputDirectoryPath))
             {
                 Directory.CreateDirectory(OutputDirectoryPath);
@@ -107,6 +111,8 @@ namespace BuildXL.Execution.Analyzer
                 }
             }
 
+            Console.WriteLine($"PackedPipGraphExporter: Added {PipGraph.PipCount} pips at {DateTime.Now}.");
+
             // Now that all pips are loaded, construct the PipDependencies RelationTable.
             pipGraph.ConstructRelationTables();
 
@@ -123,8 +129,12 @@ namespace BuildXL.Execution.Analyzer
                     buffer);
             }
 
+            Console.WriteLine($"PackedPipGraphExporter: Added {pipGraph.PipDependencies.MultiValueCount} total dependencies at {DateTime.Now}.");
+
             // and write it out
             pipGraph.SaveToDirectory(OutputDirectoryPath);
+
+            Console.WriteLine($"PackedPipGraphExporter: Wrote out pip graph at {DateTime.Now}.");
 
             return 0;
         }

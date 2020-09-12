@@ -79,6 +79,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             MultiValues.Capacity = multiValueCapacity;
         }
 
+        public int MultiValueCount => MultiValues.Count;
+
         public override void SaveToFile(string directory, string name)
         {
             base.SaveToFile(directory, name);

@@ -74,7 +74,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public readonly struct PipId : Id<PipId>, IEqualityComparer<PipId>
     {
         public readonly int Value;
-        public PipId(int value) { Value = value; }
+        public PipId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
         int Id<PipId>.FromId() => Value;
         PipId Id<PipId>.ToId(int value) => new PipId(value);
         public override string ToString() => $"PipId[{Value}]";
