@@ -19,15 +19,15 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void RelationTable_can_store_one_relation()
         {
-            PackedExecution pipGraph = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
+            PackedExecution packedExecution = new PackedExecution();
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
+            PipId pipId = packedExecutionBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
-            pipGraph.ConstructRelationTables();
+            packedExecution.ConstructRelationTables();
 
-            RelationTable<PipId, PipId> relationTable = pipGraph.PipDependencies;
+            RelationTable<PipId, PipId> relationTable = packedExecution.PipDependencies;
 
             relationTable.Add(new[] { pipId }.AsSpan());
 
@@ -45,21 +45,21 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void RelationTable_can_store_multiple_relations()
         {
-            PackedExecution pipGraph = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
+            PackedExecution packedExecution = new PackedExecution();
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
-            PipId pipId2 = pipGraphBuilder.PipTableBuilder.Add(hash + 1, $"{name}2", PipType.Process);
-            PipId pipId3 = pipGraphBuilder.PipTableBuilder.Add(hash + 2, $"{name}3", PipType.Process);
+            PipId pipId = packedExecutionBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
+            PipId pipId2 = packedExecutionBuilder.PipTableBuilder.Add(hash + 1, $"{name}2", PipType.Process);
+            PipId pipId3 = packedExecutionBuilder.PipTableBuilder.Add(hash + 2, $"{name}3", PipType.Process);
 
             XAssert.AreNotEqual(pipId, pipId2);
             XAssert.AreNotEqual(pipId, pipId3);
             XAssert.AreNotEqual(pipId2, pipId3);
 
-            pipGraph.ConstructRelationTables();
+            packedExecution.ConstructRelationTables();
 
-            RelationTable<PipId, PipId> relationTable = pipGraph.PipDependencies;
+            RelationTable<PipId, PipId> relationTable = packedExecution.PipDependencies;
 
             relationTable.Add(new[] { pipId2, pipId3 }.AsSpan());
 

@@ -21,8 +21,10 @@ namespace Test.Tool.Analyzers
         {
             PackedExecution packedExecution = new PackedExecution();
 
-            XAssert.AreEqual(0, packedExecution.PipTable.Count);
+            XAssert.AreEqual(0, packedExecution.DirectoryTable.Count);
             XAssert.AreEqual(0, packedExecution.FileTable.Count);
+            XAssert.AreEqual(0, packedExecution.PathTable.Count);
+            XAssert.AreEqual(0, packedExecution.PipTable.Count);
             XAssert.AreEqual(0, packedExecution.StringTable.Count);
             XAssert.AreEqual(0, packedExecution.WorkerTable.Count);
         }
@@ -37,8 +39,10 @@ namespace Test.Tool.Analyzers
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";            
             PipId id = packedExecutionBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
-            XAssert.AreEqual(1, packedExecution.PipTable.Count);
+            XAssert.AreEqual(0, packedExecution.DirectoryTable.Count);
             XAssert.AreEqual(0, packedExecution.FileTable.Count);
+            XAssert.AreEqual(0, packedExecution.PathTable.Count);
+            XAssert.AreEqual(1, packedExecution.PipTable.Count);
             XAssert.AreEqual(4, packedExecution.StringTable.Count);
             XAssert.AreEqual(0, packedExecution.WorkerTable.Count);
 
