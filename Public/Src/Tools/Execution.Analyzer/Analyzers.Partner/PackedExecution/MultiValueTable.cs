@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Represents a table with a sequence of values per ID.

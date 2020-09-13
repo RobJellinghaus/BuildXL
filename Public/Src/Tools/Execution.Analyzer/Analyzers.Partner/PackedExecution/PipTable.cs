@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Enumeration representing the types of pips.

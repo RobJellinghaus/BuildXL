@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Generic Span[T] methods for saving and loading spans of unmanaged values.

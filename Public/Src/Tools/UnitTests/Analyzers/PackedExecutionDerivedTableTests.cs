@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using BuildXL.Execution.Analyzers.PackedPipGraph;
+using BuildXL.Execution.Analyzers.PackedExecution;
 using System;
 using System.Linq;
 using Test.BuildXL.TestUtilities.Xunit;
@@ -10,22 +10,22 @@ using Xunit.Abstractions;
 
 namespace Test.Tool.Analyzers
 {
-    public class PackedPipGraphDerivedTableTests : TemporaryStorageTestBase
+    public class PackedExecutionDerivedTableTests : TemporaryStorageTestBase
     {
-        public PackedPipGraphDerivedTableTests(ITestOutputHelper output) : base(output)
+        public PackedExecutionDerivedTableTests(ITestOutputHelper output) : base(output)
         {
         }
 
         [Fact]
         public void DerivedTable_can_store_one_element()
         {
-            PackedPipGraph pipGraph = new PackedPipGraph();
+            PackedExecution pipGraph = new PackedExecution();
             SingleValueTable<PipId, int> derivedTable = new SingleValueTable<PipId, int>(pipGraph.PipTable);
 
             XAssert.AreEqual(0, derivedTable.Count);
             XAssert.AreEqual(0, derivedTable.Ids.Count());
 
-            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
 
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
@@ -44,9 +44,9 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void DerivedTable_can_save_and_load()
         {
-            PackedPipGraph pipGraph = new PackedPipGraph();
+            PackedExecution pipGraph = new PackedExecution();
             SingleValueTable<PipId, int> derivedTable = new SingleValueTable<PipId, int>(pipGraph.PipTable);
-            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
 
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";

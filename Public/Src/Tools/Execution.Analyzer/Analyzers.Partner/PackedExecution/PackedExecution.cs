@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Overall data structure representing an entire BXL execution graph.
@@ -11,7 +11,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// <remarks>
     /// Consists of multiple tables, with methods to construct, save, and load them all.
     /// </remarks>
-    public class PackedPipGraph
+    public class PackedExecution
     {
         /// <summary>
         /// The strings (all of them, from everything).
@@ -37,19 +37,38 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public readonly WorkerTable WorkerTable;
 
         /// <summary>
-        /// The dependency relation (from the dependent, towards the dependency).
+        /// The pip dependency relation (from the dependent pip, towards the dependency pip).
         /// </summary>
         public RelationTable<PipId, PipId> PipDependencies { get; private set; }
 
         /// <summary>
-        /// Construct a PackedPipGraph with empty base tables.
+        /// The static input file relation (from executed pips towards their statically declared input files).
+        /// </summary>
+        public RelationTable<PipId, FileId> DeclaredInputFiles { get; private set; }
+
+        /// <summary>
+        /// The produced file relation (from executed pips towards the files they produced).
+        /// </summary>
+        public RelationTable<PipId, FileId> ConsumedFiles { get; private set; }
+
+        /// <summary>
+        /// The pip that produced each file (that was produced by any pip).
+        /// </summary>
+        /// <remarks>
+        /// If the file was directly declared as an output, then this is easy. Otherwise, this is calculated
+        /// by determining the pip which produced the most closely containing parent directory of the file.
+        /// </remarks>
+        public SingleValueTable<FileId, PipId> ProducerPips { get; private set; }
+
+        /// <summary>
+        /// Construct a PackedExecution with empty base tables.
         /// </summary>
         /// <remarks>
         /// After creating these tables, create their Builders (inner classes) to populate them.
         /// Note that calling ConstructRelationTables() is necessary after these are fully built,
         /// before the relations can then be built.
         /// </remarks>
-        public PackedPipGraph()
+        public PackedExecution()
         {
             StringTable = new StringTable();
             PipTable = new PipTable(StringTable);
@@ -100,13 +119,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
 
         public class Builder
         {
-            public readonly PackedPipGraph PipGraph;
+            public readonly PackedExecution PipGraph;
             public readonly StringTable.CachingBuilder StringTableBuilder;
             public readonly PipTable.Builder PipTableBuilder;
             public readonly FileTable.CachingBuilder FileTableBuilder;
             public readonly WorkerTable.CachingBuilder WorkerTableBuilder;
 
-            public Builder(PackedPipGraph pipGraph)
+            public Builder(PackedExecution pipGraph)
             {
                 PipGraph = pipGraph;
                 StringTableBuilder = new StringTable.CachingBuilder(PipGraph.StringTable);

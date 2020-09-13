@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// An ITable defines an ID space for its elements.

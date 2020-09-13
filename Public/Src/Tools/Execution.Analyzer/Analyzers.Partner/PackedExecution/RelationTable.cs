@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Represents one-to-many relationship between two tables.

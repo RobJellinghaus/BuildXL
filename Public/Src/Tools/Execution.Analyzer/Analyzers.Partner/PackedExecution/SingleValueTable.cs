@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Defines a new ID space and set of base values for each ID.

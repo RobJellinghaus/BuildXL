@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using BuildXL.Execution.Analyzers.PackedPipGraph;
+using BuildXL.Execution.Analyzers.PackedExecution;
 using System;
 using System.Linq;
 using Test.BuildXL.TestUtilities.Xunit;
@@ -10,9 +10,9 @@ using Xunit.Abstractions;
 
 namespace Test.Tool.Analyzers
 {
-    public class PackedPipGraphStringTableTests : TemporaryStorageTestBase
+    public class PackedExecutionStringTableTests : TemporaryStorageTestBase
     {
-        public PackedPipGraphStringTableTests(ITestOutputHelper output) : base(output)
+        public PackedExecutionStringTableTests(ITestOutputHelper output) : base(output)
         {
         }
 

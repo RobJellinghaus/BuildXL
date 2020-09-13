@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using BuildXL.Execution.Analyzers.PackedPipGraph;
+using BuildXL.Execution.Analyzers.PackedExecution;
 using System;
 using Test.BuildXL.TestUtilities.Xunit;
 using Xunit;
@@ -9,17 +9,17 @@ using Xunit.Abstractions;
 
 namespace Test.Tool.Analyzers
 {
-    public class PackedPipGraphRelationTableTests : TemporaryStorageTestBase
+    public class PackedExecutionRelationTableTests : TemporaryStorageTestBase
     {
-        public PackedPipGraphRelationTableTests(ITestOutputHelper output) : base(output)
+        public PackedExecutionRelationTableTests(ITestOutputHelper output) : base(output)
         {
         }
 
         [Fact]
         public void RelationTable_can_store_one_relation()
         {
-            PackedPipGraph pipGraph = new PackedPipGraph();
-            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+            PackedExecution pipGraph = new PackedExecution();
+            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
@@ -44,8 +44,8 @@ namespace Test.Tool.Analyzers
         [Fact]
         public void RelationTable_can_store_multiple_relations()
         {
-            PackedPipGraph pipGraph = new PackedPipGraph();
-            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+            PackedExecution pipGraph = new PackedExecution();
+            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(pipGraph);
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);

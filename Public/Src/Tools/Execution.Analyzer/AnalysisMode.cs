@@ -45,7 +45,7 @@ namespace BuildXL.Execution.Analyzer
         ObservedInput,
         ObservedInputSummary,
         ObservedAccess,
-        PackedPipGraphExporter,
+        PackedExecutionExporter,
         PerfSummary,
         PipFilter,
         PipFingerprint,

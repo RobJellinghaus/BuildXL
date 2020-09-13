@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Boilerplate ID type to avoid ID confusion in code.
@@ -20,16 +20,39 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public int GetHashCode([DisallowNull] FileId obj) => obj.Value;
     }
 
+    /// <summary>
+    /// Information about a single file.
+    /// </summary>
     public struct FileEntry 
     {
-        public readonly NameId Name;
+        /// <summary>
+        /// The file path.
+        /// </summary>
+        public readonly NameId Path;
+        /// <summary>
+        /// The file size.
+        /// </summary>
         public readonly long SizeInBytes;
-        public FileEntry(NameId name, long sizeInBytes) { Name = name; SizeInBytes = sizeInBytes; }
+        /// <summary>
+        /// The producing pip.
+        /// </summary>
+        public readonly PipId ProducerPip;
+
+        public FileEntry(NameId name, long sizeInBytes, PipId producerPip)
+        { 
+            Path = name;
+            SizeInBytes = sizeInBytes;
+            ProducerPip = producerPip;
+        }
+
+        public FileEntry WithName(NameId name) { return new FileEntry(name, SizeInBytes, ProducerPip); }
+        public FileEntry WithSizeInBytes(long sizeInBytes) { return new FileEntry(Path, sizeInBytes, ProducerPip); }
+        public FileEntry WithProducerPip(PipId producerPip) { return new FileEntry(Path, SizeInBytes, producerPip); }
 
         public struct EqualityComparer : IEqualityComparer<FileEntry>
         {
-            public bool Equals(FileEntry x, FileEntry y) => x.Name.Equals(y.Name);
-            public int GetHashCode([DisallowNull] FileEntry obj) => obj.Name.GetHashCode();
+            public bool Equals(FileEntry x, FileEntry y) => x.Path.Equals(y.Path);
+            public int GetHashCode([DisallowNull] FileEntry obj) => obj.Path.GetHashCode();
         }
     }
 
@@ -83,11 +106,9 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             /// The only time that value can be set is when adding a new file not previously recorded.
             /// TODO: consider failing if this happens?
             /// </remarks>
-            public FileId GetOrAdd(string filePath, long sizeInBytes)
+            public FileId GetOrAdd(string filePath, long sizeInBytes, PipId producerPip)
             {
-                FileEntry entry = new FileEntry(
-                    NameTableBuilder.GetOrAdd(filePath),
-                    sizeInBytes);
+                FileEntry entry = new FileEntry(NameTableBuilder.GetOrAdd(filePath), sizeInBytes, producerPip);
                 return GetOrAdd(entry);
             }
         }

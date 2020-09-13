@@ -4,7 +4,7 @@
 using System;
 using BuildXL.Utilities;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     public static class SpanUtilities
     {
@@ -67,7 +67,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// todo: once MemoryExtensions.Sort() lands we can remove all of this (tracking issue: https://github.com/kevin-montrose/Cesil/issues/29)
         ///       coming as part of .NET 5, as a consequence of https://github.com/dotnet/runtime/issues/19969
         ///       
-        /// Editor: This is a suboptimal implementation and we don't currently guarantee in PackedPipGraph that we *don't* call this
+        /// Editor: This is a suboptimal implementation and we don't currently guarantee in PackedExecution that we *don't* call this
         /// on unsorted data.
         /// </remarks>
         public static void Sort<T>(this Span<T> span, Comparison<T> comparer)

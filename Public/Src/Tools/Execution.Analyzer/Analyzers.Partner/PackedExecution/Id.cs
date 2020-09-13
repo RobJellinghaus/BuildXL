@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Interface implemented by ID types, to enable generic conversion to and from int.

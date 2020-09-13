@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BuildXL.Execution.Analyzers.PackedPipGraph
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// A List implementation that allows Spans to be built over its backing store.

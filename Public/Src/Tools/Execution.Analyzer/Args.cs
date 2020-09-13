@@ -316,8 +316,8 @@ namespace BuildXL.Execution.Analyzer
                 case AnalysisMode.ObservedInputSummary:
                     m_analyzer = InitializeObservedInputSummaryResult();
                     break;
-                case AnalysisMode.PackedPipGraphExporter:
-                    m_analyzer = InitializePackedPipGraphExporter();
+                case AnalysisMode.PackedExecutionExporter:
+                    m_analyzer = InitializePackedExecutionExporter();
                     break;
                 case AnalysisMode.PerfSummary:
                     m_analyzer = InitializePerfSummaryAnalyzer();
