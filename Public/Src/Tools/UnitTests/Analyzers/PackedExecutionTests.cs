@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using BuildXL.Execution.Analyzers.PackedExecution;
-using System;
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.Linq;
 using Test.BuildXL.TestUtilities.Xunit;
 using Xunit;

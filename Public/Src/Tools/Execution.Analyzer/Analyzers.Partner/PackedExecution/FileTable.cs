@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -14,8 +14,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     {
         public readonly int Value;
         public FileId(int value) { Id<FileId>.CheckNotZero(value); Value = value; }
-        int Id<FileId>.FromId() => Value;
-        FileId Id<FileId>.ToId(int value) => new FileId(value);
+        public int FromId() => Value;
+        public FileId ToId(int value) => new FileId(value);
         public override string ToString() => $"FileId[{Value}]";
         public bool Equals([AllowNull] FileId x, [AllowNull] FileId y) => x.Value == y.Value;
         public int GetHashCode([DisallowNull] FileId obj) => obj.Value;

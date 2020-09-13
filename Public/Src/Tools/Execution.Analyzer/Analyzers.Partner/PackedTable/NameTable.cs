@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     /// <summary>
     /// Boilerplate ID type to avoid ID confusion in code.
@@ -15,8 +15,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     {
         internal readonly int Value;
         internal NameId(int value) { Id<NameId>.CheckNotZero(value); Value = value; }
-        int Id<NameId>.FromId() => Value;
-        NameId Id<NameId>.ToId(int value) => new NameId(value);
+        public int FromId() => Value;
+        public NameId ToId(int value) => new NameId(value);
         public bool Equals(NameId other) => Value == other.Value;
         public override int GetHashCode() => Value;
         public override string ToString() => $"NameId[{Value}]";

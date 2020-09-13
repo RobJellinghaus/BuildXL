@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.IO;
-using Microsoft.VisualStudio.Services.Tokens;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {

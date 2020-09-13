@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     /// <summary>
     /// Represents a table with a sequence of values per ID.

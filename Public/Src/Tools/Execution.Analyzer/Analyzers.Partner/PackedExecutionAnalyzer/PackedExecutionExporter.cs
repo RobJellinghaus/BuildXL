@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedExecution;
+using BuildXL.Execution.Analyzers.PackedTable;
+using BuildXL.Pips;
+using BuildXL.Pips.Operations;
+using BuildXL.ToolSupport;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BuildXL.Execution.Analyzers.PackedExecution;
-using BuildXL.Pips;
-using BuildXL.Pips.Operations;
-using BuildXL.ToolSupport;
 
 namespace BuildXL.Execution.Analyzer
 {
@@ -22,7 +23,7 @@ namespace BuildXL.Execution.Analyzer
     using P_PipId = BuildXL.Execution.Analyzers.PackedExecution.PipId;
     using P_PipTable = BuildXL.Execution.Analyzers.PackedExecution.PipTable;
     using P_PipType = BuildXL.Execution.Analyzers.PackedExecution.PipType;
-    using P_StringTable = BuildXL.Execution.Analyzers.PackedExecution.StringTable;
+    using P_StringTable = BuildXL.Execution.Analyzers.PackedTable.StringTable;
 
     internal partial class Args
     {
@@ -92,9 +93,9 @@ namespace BuildXL.Execution.Analyzer
                 Directory.CreateDirectory(m_outputDirectoryPath);
             }
 
-            PackedExecution pipGraph = new PackedExecution();
-            P_StringTable.CachingBuilder stringBuilder = new P_StringTable.CachingBuilder(pipGraph.StringTable);
-            P_PipTable.Builder pipBuilder = new P_PipTable.Builder(pipGraph.PipTable, stringBuilder);
+            PackedExecution packedExecution = new PackedExecution();
+            P_StringTable.CachingBuilder stringBuilder = new P_StringTable.CachingBuilder(packedExecution.StringTable);
+            P_PipTable.Builder pipBuilder = new P_PipTable.Builder(packedExecution.PipTable, stringBuilder);
 
             List<PipReference> pipList =
                 PipGraph.AsPipReferences(PipTable.StableKeys, PipQueryContext.PipGraphRetrieveAllPips).ToList();
@@ -114,7 +115,7 @@ namespace BuildXL.Execution.Analyzer
             Console.WriteLine($"PackedExecutionExporter: Added {PipGraph.PipCount} pips at {DateTime.Now}.");
 
             // Now that all pips are loaded, construct the PipDependencies RelationTable.
-            pipGraph.ConstructRelationTables();
+            packedExecution.ConstructRelationTables();
 
             // and now do it again with the dependencies, now that everything is established.
             // Since we added all the pips in pipList order to PipTable, we can traverse them again in the same order
@@ -125,14 +126,14 @@ namespace BuildXL.Execution.Analyzer
                 AddPipDependencies(
                     new P_PipId(i + 1),
                     pipList[i],
-                    pipGraph.PipDependencies,
+                    packedExecution.PipDependencies,
                     buffer);
             }
 
-            Console.WriteLine($"PackedExecutionExporter: Added {pipGraph.PipDependencies.MultiValueCount} total dependencies at {DateTime.Now}.");
+            Console.WriteLine($"PackedExecutionExporter: Added {packedExecution.PipDependencies.MultiValueCount} total dependencies at {DateTime.Now}.");
 
             // and write it out
-            pipGraph.SaveToDirectory(m_outputDirectoryPath);
+            packedExecution.SaveToDirectory(m_outputDirectoryPath);
 
             Console.WriteLine($"PackedExecutionExporter: Wrote out pip graph at {DateTime.Now}.");
 

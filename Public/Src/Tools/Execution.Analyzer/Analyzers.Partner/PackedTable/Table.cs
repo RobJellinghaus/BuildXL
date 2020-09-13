@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     /// <summary>
     /// Base abstract Table class with some common implementation.

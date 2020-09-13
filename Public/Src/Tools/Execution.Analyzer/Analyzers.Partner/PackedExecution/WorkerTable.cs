@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -13,8 +14,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     {
         public readonly int Value;
         public WorkerId(int value) { Value = value; }
-        int Id<WorkerId>.FromId() => Value;
-        WorkerId Id<WorkerId>.ToId(int value) => new WorkerId(value);
+        public int FromId() => Value;
+        public WorkerId ToId(int value) => new WorkerId(value);
         public override string ToString() => $"WorkerId[{Value}]";
         public bool Equals([AllowNull] WorkerId x, [AllowNull] WorkerId y) => x.Value == y.Value;
         public int GetHashCode([DisallowNull] WorkerId obj) => obj.Value;

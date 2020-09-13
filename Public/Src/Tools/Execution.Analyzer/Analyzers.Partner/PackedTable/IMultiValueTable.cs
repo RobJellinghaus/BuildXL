@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     /// <summary>
     /// Interface to tables which store multiple values per ID.

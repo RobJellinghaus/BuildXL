@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using bxlanalyzer.Analyzers.Partner.PackedExecution;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -14,8 +14,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     {
         public readonly int Value;
         public DirectoryId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
-        int Id<DirectoryId>.FromId() => Value;
-        DirectoryId Id<DirectoryId>.ToId(int value) => new DirectoryId(value);
+        public int FromId() => Value;
+        public DirectoryId ToId(int value) => new DirectoryId(value);
         public override string ToString() => $"DirectoryId[{Value}]";
         public bool Equals([AllowNull] DirectoryId x, [AllowNull] DirectoryId y) => x.Value == y.Value;
         public int GetHashCode([DisallowNull] DirectoryId obj) => obj.Value;

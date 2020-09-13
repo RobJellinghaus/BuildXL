@@ -4,7 +4,7 @@
 using System;
 using BuildXL.Utilities;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     public static class SpanUtilities
     {

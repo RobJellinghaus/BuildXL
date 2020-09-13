@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildXL.Execution.Analyzers.PackedExecution
+namespace BuildXL.Execution.Analyzers.PackedTable
 {
     /// <summary>
     /// Represents one-to-many relationship between two tables.

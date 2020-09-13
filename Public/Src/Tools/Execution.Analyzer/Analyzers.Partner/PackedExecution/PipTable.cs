@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using BuildXL.Execution.Analyzers.PackedTable;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -74,8 +75,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     {
         public readonly int Value;
         public PipId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
-        int Id<PipId>.FromId() => Value;
-        PipId Id<PipId>.ToId(int value) => new PipId(value);
+        public int FromId() => Value;
+        public PipId ToId(int value) => new PipId(value);
         public override string ToString() => $"PipId[{Value}]";
         public bool Equals([AllowNull] PipId x, [AllowNull] PipId y) => x.Value == y.Value;
         public int GetHashCode([DisallowNull] PipId obj) => obj.Value;

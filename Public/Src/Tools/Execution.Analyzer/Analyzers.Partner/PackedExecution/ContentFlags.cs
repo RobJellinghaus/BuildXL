@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-namespace bxlanalyzer.Analyzers.Partner.PackedExecution
+using System;
+
+namespace BuildXL.Execution.Analyzers.PackedExecution
 {
     /// <summary>
     /// Flags relating to the origin and/or destination of content (files and directories) in the build.
