@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using BuildXL.Utilities;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -12,7 +13,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     public struct FileId : Id<FileId>, IEqualityComparer<FileId>
     {
         public readonly int Value;
-        public FileId(int value) { Id<StringId>.CheckNotZero(value); Value = value; }
+        public FileId(int value) { Id<FileId>.CheckNotZero(value); Value = value; }
         int Id<FileId>.FromId() => Value;
         FileId Id<FileId>.ToId(int value) => new FileId(value);
         public override string ToString() => $"FileId[{Value}]";
@@ -26,18 +27,11 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     public struct FileEntry 
     {
         /// <summary>
-        /// The file path.
+        /// The file
         /// </summary>
         public readonly NameId Path;
-        /// <summary>
-        /// The file size.
-        /// </summary>
         public readonly long SizeInBytes;
-        /// <summary>
-        /// The producing pip.
-        /// </summary>
         public readonly PipId ProducerPip;
-
         public FileEntry(NameId name, long sizeInBytes, PipId producerPip)
         { 
             Path = name;
@@ -68,34 +62,22 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         /// The names of files in this FileTable.
         /// </summary>
         /// <remarks>
-        /// This sub-table is owned by this FileTable; the FileTable constructs it, and saves and loads it.
+        /// This table is shared between this table and the DirectoryTable.
         /// </remarks>
-        public readonly NameTable FileNameTable;
+        public readonly NameTable PathTable;
 
-        public FileTable(StringTable stringTable, int capacity = DefaultCapacity) : base(capacity)
+        public FileTable(NameTable pathTable, int capacity = DefaultCapacity) : base(capacity)
         {
-            FileNameTable = new NameTable('\\', stringTable);
-        }
-
-        public override void SaveToFile(string directory, string name)
-        {
-            base.SaveToFile(directory, name);
-            FileNameTable.SaveToFile(directory, InsertSuffix(name, nameof(FileNameTable)));
-        }
-
-        public override void LoadFromFile(string directory, string name)
-        {
-            base.LoadFromFile(directory, name);
-            FileNameTable.LoadFromFile(directory, InsertSuffix(name, nameof(FileNameTable)));
+            PathTable = pathTable;
         }
 
         public class CachingBuilder : CachingBuilder<FileEntry.EqualityComparer>
         {
-            public readonly NameTable.Builder NameTableBuilder;
+            public readonly NameTable.Builder PathTableBuilder;
 
-            public CachingBuilder(FileTable table, StringTable.CachingBuilder stringTableBuilder) : base(table)
+            public CachingBuilder(FileTable table, NameTable.Builder pathTableBuilder) : base(table)
             {
-                NameTableBuilder = new NameTable.Builder(table.FileNameTable, stringTableBuilder);
+                PathTableBuilder = pathTableBuilder;
             }
 
             /// <summary>
@@ -108,7 +90,10 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             /// </remarks>
             public FileId GetOrAdd(string filePath, long sizeInBytes, PipId producerPip)
             {
-                FileEntry entry = new FileEntry(NameTableBuilder.GetOrAdd(filePath), sizeInBytes, producerPip);
+                FileEntry entry = new FileEntry(
+                    PathTableBuilder.GetOrAdd(filePath),
+                    sizeInBytes,
+                    producerPip);
                 return GetOrAdd(entry);
             }
         }

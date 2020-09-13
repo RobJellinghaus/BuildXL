@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using Microsoft.VisualStudio.Services.Tokens;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -10,21 +11,17 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
     /// </summary>
     /// <remarks>
     /// Consists of multiple tables, with methods to construct, save, and load them all.
+    /// 
+    /// Please keep lists of fields, tables, relations, etc. locally sorted in this file, for better merging as this grows.
     /// </remarks>
     public class PackedExecution
     {
-        /// <summary>
-        /// The strings (all of them, from everything).
-        /// </summary>
-        /// <remarks>
-        /// Case-sensitive.
-        /// </remarks>
-        public readonly StringTable StringTable;
+        #region Tables
 
         /// <summary>
-        /// The pips.
+        /// The directories.
         /// </summary>
-        public readonly PipTable PipTable;
+        public readonly DirectoryTable DirectoryTable;
 
         /// <summary>
         /// The files.
@@ -32,19 +29,34 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         public readonly FileTable FileTable;
 
         /// <summary>
+        /// The paths.
+        /// </summary>
+        /// <remarks>
+        /// Shared by FileTable and DirectoryTable.
+        /// </remarks>
+        public readonly NameTable PathTable;
+
+        /// <summary>
+        /// The pips.
+        /// </summary>
+        public readonly PipTable PipTable;
+
+        /// <summary>
+        /// The strings.
+        /// </summary>
+        /// <remarks>
+        /// Shared by everything that contains strings (mainly PathTable).
+        /// </remarks>
+        public readonly StringTable StringTable;
+
+        /// <summary>
         /// The workers.
         /// </summary>
         public readonly WorkerTable WorkerTable;
 
-        /// <summary>
-        /// The pip dependency relation (from the dependent pip, towards the dependency pip).
-        /// </summary>
-        public RelationTable<PipId, PipId> PipDependencies { get; private set; }
+        #endregion
 
-        /// <summary>
-        /// The static input file relation (from executed pips towards their statically declared input files).
-        /// </summary>
-        public RelationTable<PipId, FileId> DeclaredInputFiles { get; private set; }
+        #region Relations
 
         /// <summary>
         /// The produced file relation (from executed pips towards the files they produced).
@@ -52,13 +64,26 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         public RelationTable<PipId, FileId> ConsumedFiles { get; private set; }
 
         /// <summary>
-        /// The pip that produced each file (that was produced by any pip).
+        /// The static input directory relation (from executed pips towards their statically declared input directories).
         /// </summary>
-        /// <remarks>
-        /// If the file was directly declared as an output, then this is easy. Otherwise, this is calculated
-        /// by determining the pip which produced the most closely containing parent directory of the file.
-        /// </remarks>
-        public SingleValueTable<FileId, PipId> ProducerPips { get; private set; }
+        public RelationTable<PipId, DirectoryId> DeclaredInputDirectories { get; private set; }
+
+        /// <summary>
+        /// The static input file relation (from executed pips towards their statically declared input files).
+        /// </summary>
+        public RelationTable<PipId, FileId> DeclaredInputFiles { get; private set; }
+
+        /// <summary>
+        /// The directory contents relation (from directories towards the files they contain).
+        /// </summary>
+        public RelationTable<DirectoryId, FileId> DirectoryContents { get; private set; }
+
+        /// <summary>
+        /// The pip dependency relation (from the dependent pip, towards the dependency pip).
+        /// </summary>
+        public RelationTable<PipId, PipId> PipDependencies { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Construct a PackedExecution with empty base tables.
@@ -71,15 +96,24 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         public PackedExecution()
         {
             StringTable = new StringTable();
+            PathTable = new NameTable('\\', StringTable);
+            DirectoryTable = new DirectoryTable(PathTable);
+            FileTable = new FileTable(PathTable);
             PipTable = new PipTable(StringTable);
-            FileTable = new FileTable(StringTable);
             WorkerTable = new WorkerTable(StringTable);
         }
 
-        private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.bin";
-        private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
+        private static readonly string s_directoryTableFileName = $"{nameof(DirectoryTable)}.bin";
         private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
+        private static readonly string s_pathTableFileName = $"{nameof(PathTable)}.bin";
+        private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
+        private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.bin";
         private static readonly string s_workerTableFileName = $"{nameof(WorkerTable)}.bin";
+
+        private static readonly string s_consumedFilesFileName = $"{nameof(ConsumedFiles)}.bin";
+        private static readonly string s_declaredInputDirectoriesFileName = $"{nameof(DeclaredInputDirectories)}.bin";
+        private static readonly string s_declaredInputFilesFileName = $"{nameof(DeclaredInputFiles)}.bin";
+        private static readonly string s_directoryContentsFileName = $"{nameof(DirectoryContents)}.bin";
         private static readonly string s_pipDependenciesFileName = $"{nameof(PipDependencies)}.bin";
 
         /// <summary>
@@ -87,51 +121,79 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         /// </summary>
         public void ConstructRelationTables()
         {
+            ConsumedFiles = new RelationTable<PipId, FileId>(PipTable, FileTable);
+            DeclaredInputDirectories = new RelationTable<PipId, DirectoryId>(PipTable, DirectoryTable);
+            DeclaredInputFiles = new RelationTable<PipId, FileId>(PipTable, FileTable);
+            DirectoryContents = new RelationTable<DirectoryId, FileId>(DirectoryTable, FileTable);
             PipDependencies = new RelationTable<PipId, PipId>(PipTable, PipTable);
         }
 
         public void SaveToDirectory(string directory)
         {
-            StringTable.SaveToFile(directory, s_stringTableFileName);
-            PipTable.SaveToFile(directory, s_pipTableFileName);
+            DirectoryTable.SaveToFile(directory, s_directoryTableFileName);
             FileTable.SaveToFile(directory, s_fileTableFileName);
+            PathTable.SaveToFile(directory, s_pathTableFileName);
+            PipTable.SaveToFile(directory, s_pipTableFileName);
+            StringTable.SaveToFile(directory, s_stringTableFileName);
             WorkerTable.SaveToFile(directory, s_workerTableFileName);
 
-            if (PipDependencies != null)
-            {
-                PipDependencies.SaveToFile(directory, s_pipDependenciesFileName);
-            }
+            ConsumedFiles?.SaveToFile(directory, s_consumedFilesFileName);
+            DeclaredInputDirectories?.SaveToFile(directory, s_declaredInputDirectoriesFileName);
+            DeclaredInputFiles?.SaveToFile(directory, s_declaredInputFilesFileName);
+            DirectoryContents?.SaveToFile(directory, s_directoryContentsFileName);
+            PipDependencies?.SaveToFile(directory, s_pipDependenciesFileName);
         }
 
         public void LoadFromDirectory(string directory)
         {
-            StringTable.LoadFromFile(directory, s_stringTableFileName);
-            PipTable.LoadFromFile(directory, s_pipTableFileName);
+            DirectoryTable.LoadFromFile(directory, s_directoryTableFileName);
             FileTable.LoadFromFile(directory, s_fileTableFileName);
+            PathTable.LoadFromFile(directory, s_pathTableFileName);
+            PipTable.LoadFromFile(directory, s_pipTableFileName);
+            StringTable.LoadFromFile(directory, s_stringTableFileName);
             WorkerTable.LoadFromFile(directory, s_workerTableFileName);
 
-            if (File.Exists(Path.Combine(directory, s_pipDependenciesFileName)))
+            ConstructRelationTables();
+
+            loadRelationTableIfExists(directory, s_consumedFilesFileName, ConsumedFiles);
+            loadRelationTableIfExists(directory, s_declaredInputDirectoriesFileName, DeclaredInputDirectories);
+            loadRelationTableIfExists(directory, s_declaredInputFilesFileName, DeclaredInputFiles);
+            loadRelationTableIfExists(directory, s_directoryContentsFileName, DirectoryContents);
+            loadRelationTableIfExists(directory, s_pipDependenciesFileName, PipDependencies);
+
+            void loadRelationTableIfExists<TFromId, TToId>(string directory, string fileName, RelationTable<TFromId, TToId> relation)
+                where TFromId : unmanaged, Id<TFromId>
+                where TToId : unmanaged, Id<TToId>
             {
-                ConstructRelationTables();
-                PipDependencies.LoadFromFile(directory, s_pipDependenciesFileName);
+                if (File.Exists(Path.Combine(directory, fileName)))
+                {
+                    relation.LoadFromFile(directory, fileName);
+                }
             }
         }
 
         public class Builder
         {
-            public readonly PackedExecution PipGraph;
-            public readonly StringTable.CachingBuilder StringTableBuilder;
-            public readonly PipTable.Builder PipTableBuilder;
+            public readonly PackedExecution PackedExecution;
+
+            public readonly DirectoryTable.CachingBuilder DirectoryTableBuilder;
             public readonly FileTable.CachingBuilder FileTableBuilder;
+            public readonly NameTable.Builder PathTableBuilder;
+            public readonly PipTable.Builder PipTableBuilder;
+            public readonly StringTable.CachingBuilder StringTableBuilder;
             public readonly WorkerTable.CachingBuilder WorkerTableBuilder;
 
             public Builder(PackedExecution pipGraph)
             {
-                PipGraph = pipGraph;
-                StringTableBuilder = new StringTable.CachingBuilder(PipGraph.StringTable);
-                PipTableBuilder = new PipTable.Builder(PipGraph.PipTable, StringTableBuilder);
-                FileTableBuilder = new FileTable.CachingBuilder(PipGraph.FileTable, StringTableBuilder);
-                WorkerTableBuilder = new WorkerTable.CachingBuilder(PipGraph.WorkerTable, StringTableBuilder);
+                PackedExecution = pipGraph;
+
+                // these are sorted as much as possible given construction order constraints
+                StringTableBuilder = new StringTable.CachingBuilder(PackedExecution.StringTable);
+                PathTableBuilder = new NameTable.Builder(PackedExecution.PathTable, StringTableBuilder);
+                DirectoryTableBuilder = new DirectoryTable.CachingBuilder(PackedExecution.DirectoryTable, PathTableBuilder);
+                FileTableBuilder = new FileTable.CachingBuilder(PackedExecution.FileTable, PathTableBuilder);
+                PipTableBuilder = new PipTable.Builder(PackedExecution.PipTable, StringTableBuilder);
+                WorkerTableBuilder = new WorkerTable.CachingBuilder(PackedExecution.WorkerTable, StringTableBuilder);
             }
         }
     }

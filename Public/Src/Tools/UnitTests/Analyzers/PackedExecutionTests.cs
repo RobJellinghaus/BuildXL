@@ -31,11 +31,11 @@ namespace Test.Tool.Analyzers
         public void PackedExecution_can_store_pips()
         {
             PackedExecution packedExecution = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(packedExecution);
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
 
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";            
-            PipId id = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
+            PipId id = packedExecutionBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
 
             XAssert.AreEqual(1, packedExecution.PipTable.Count);
             XAssert.AreEqual(0, packedExecution.FileTable.Count);
@@ -51,27 +51,27 @@ namespace Test.Tool.Analyzers
         public void PackedExecution_can_store_files()
         {
             PackedExecution packedExecution = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(packedExecution);
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
 
             string path = "d:\\os\\bin\\shellcommon\\shell\\merged\\winmetadata\\appresolverux.winmd";
-            FileId id = pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024, default);
+            FileId id = packedExecutionBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024, default);
 
             XAssert.AreEqual(0, packedExecution.PipTable.Count);
             XAssert.AreEqual(1, packedExecution.FileTable.Count);
             XAssert.AreEqual(8, packedExecution.StringTable.Count);
             XAssert.AreEqual(0, packedExecution.WorkerTable.Count);
 
-            XAssert.AreEqual(path, packedExecution.FileTable.FileNameTable.GetText(packedExecution.FileTable[id].Path));
+            XAssert.AreEqual(path, packedExecution.FileTable.PathTable.GetText(packedExecution.FileTable[id].Path));
         }
 
         [Fact]
         public void PackedExecution_can_store_workers()
         {
             PackedExecution packedExecution = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(packedExecution);
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
 
             string workerName = "BIGWORKER";
-            StringId workerNameId = pipGraphBuilder.StringTableBuilder.GetOrAdd(workerName);
+            StringId workerNameId = packedExecutionBuilder.StringTableBuilder.GetOrAdd(workerName);
             WorkerId workerId = packedExecution.WorkerTable.Add(workerNameId);
             
             XAssert.AreEqual(0, packedExecution.PipTable.Count);
@@ -86,15 +86,15 @@ namespace Test.Tool.Analyzers
         public void PackedExecution_can_save_and_load()
         {
             PackedExecution packedExecution = new PackedExecution();
-            PackedExecution.Builder pipGraphBuilder = new PackedExecution.Builder(packedExecution);
+            PackedExecution.Builder packedExecutionBuilder = new PackedExecution.Builder(packedExecution);
 
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
-            PipId pipId = pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
+            PipId pipId = packedExecutionBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
             string path = "d:\\os\\bin\\shellcommon\\shell\\merged\\winmetadata\\appresolverux.winmd";
-            pipGraphBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024, pipId);
+            packedExecutionBuilder.FileTableBuilder.GetOrAdd(path, 1024 * 1024, pipId);
             string workerName = "BIGWORKER";
-            pipGraphBuilder.WorkerTableBuilder.GetOrAdd(workerName);
+            packedExecutionBuilder.WorkerTableBuilder.GetOrAdd(workerName);
 
             XAssert.AreEqual(1, packedExecution.PipTable.Count);
             XAssert.AreEqual(1, packedExecution.FileTable.Count);
@@ -102,22 +102,22 @@ namespace Test.Tool.Analyzers
 
             packedExecution.SaveToDirectory(TemporaryDirectory);
 
-            PackedExecution pipGraph2 = new PackedExecution();
-            pipGraph2.LoadFromDirectory(TemporaryDirectory);
+            PackedExecution packedExecution2 = new PackedExecution();
+            packedExecution2.LoadFromDirectory(TemporaryDirectory);
 
-            XAssert.AreEqual(1, pipGraph2.PipTable.Count);
-            XAssert.AreEqual(1, pipGraph2.FileTable.Count);
-            XAssert.AreEqual(13, pipGraph2.StringTable.Count);
+            XAssert.AreEqual(1, packedExecution2.PipTable.Count);
+            XAssert.AreEqual(1, packedExecution2.FileTable.Count);
+            XAssert.AreEqual(13, packedExecution2.StringTable.Count);
 
-            PipId pipId2 = pipGraph2.PipTable.Ids.First();
-            XAssert.AreEqual(name, pipGraph2.PipTable.PipNameTable.GetText(pipGraph2.PipTable[pipId].Name));
+            PipId pipId2 = packedExecution2.PipTable.Ids.First();
+            XAssert.AreEqual(name, packedExecution2.PipTable.PipNameTable.GetText(packedExecution2.PipTable[pipId].Name));
 
-            FileId fileId2 = pipGraph2.FileTable.Ids.First();
-            XAssert.AreEqual(path, pipGraph2.FileTable.FileNameTable.GetText(pipGraph2.FileTable[fileId2].Path));
-            XAssert.AreEqual(pipId2, pipGraph2.FileTable[fileId2].ProducerPip);
+            FileId fileId2 = packedExecution2.FileTable.Ids.First();
+            XAssert.AreEqual(path, packedExecution2.FileTable.PathTable.GetText(packedExecution2.FileTable[fileId2].Path));
+            XAssert.AreEqual(pipId2, packedExecution2.FileTable[fileId2].ProducerPip);
 
-            WorkerId workerId2 = pipGraph2.WorkerTable.Ids.First();
-            XAssert.AreEqual(workerName, new string(pipGraph2.StringTable[pipGraph2.WorkerTable[workerId2]]));
+            WorkerId workerId2 = packedExecution2.WorkerTable.Ids.First();
+            XAssert.AreEqual(workerName, new string(packedExecution2.StringTable[packedExecution2.WorkerTable[workerId2]]));
         }
     }
 }

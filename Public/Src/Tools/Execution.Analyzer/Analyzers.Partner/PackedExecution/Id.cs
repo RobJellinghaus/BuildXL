@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Net;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -39,4 +37,5 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
 
         public static void CheckNotZero(int value) { if (value == 0) { throw new ArgumentException("Cannot create ID with value 0 (use default instead)"); } }
     }
+
 }
