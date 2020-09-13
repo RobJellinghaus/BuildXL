@@ -62,6 +62,24 @@ namespace Test.Tool.Analyzers
         }
 
         [Fact]
+        public void PackedPipGraph_can_store_workers()
+        {
+            PackedPipGraph pipGraph = new PackedPipGraph();
+            PackedPipGraph.Builder pipGraphBuilder = new PackedPipGraph.Builder(pipGraph);
+
+            string workerName = "BIGWORKER";
+            StringId workerNameId = pipGraphBuilder.StringTableBuilder.GetOrAdd(workerName);
+            WorkerId workerId = pipGraph.WorkerTable.Add(workerNameId);
+            
+            XAssert.AreEqual(0, pipGraph.PipTable.Count);
+            XAssert.AreEqual(0, pipGraph.FileTable.Count);
+            XAssert.AreEqual(1, pipGraph.StringTable.Count);
+            XAssert.AreEqual(1, pipGraph.WorkerTable.Count);
+
+            XAssert.AreEqual(workerName, new string(pipGraph.StringTable[pipGraph.WorkerTable[workerId]]));
+        }
+
+        [Fact]
         public void PackedPipGraph_can_save_and_load()
         {
             PackedPipGraph pipGraph = new PackedPipGraph();
@@ -72,10 +90,12 @@ namespace Test.Tool.Analyzers
             long hash = 1;
             string name = "ShellCommon.Shell.ShellCommon.Shell.Merged.Winmetadata";
             pipGraphBuilder.PipTableBuilder.Add(hash, name, PipType.Process);
+            string workerName = "BIGWORKER";
+            pipGraphBuilder.WorkerTableBuilder.GetOrAdd(workerName);
 
             XAssert.AreEqual(1, pipGraph.PipTable.Count);
             XAssert.AreEqual(1, pipGraph.FileTable.Count);
-            XAssert.AreEqual(12, pipGraph.StringTable.Count);
+            XAssert.AreEqual(13, pipGraph.StringTable.Count);
 
             pipGraph.SaveToDirectory(TemporaryDirectory);
 
@@ -84,12 +104,16 @@ namespace Test.Tool.Analyzers
 
             XAssert.AreEqual(1, pipGraph2.PipTable.Count);
             XAssert.AreEqual(1, pipGraph2.FileTable.Count);
-            XAssert.AreEqual(12, pipGraph2.StringTable.Count);
+            XAssert.AreEqual(13, pipGraph2.StringTable.Count);
 
             FileId fileId = pipGraph2.FileTable.Ids.First();
             XAssert.AreEqual(path, pipGraph2.FileTable.FileNameTable.GetText(pipGraph2.FileTable[fileId].Name));
+
             PipId pipId = pipGraph2.PipTable.Ids.First();
             XAssert.AreEqual(name, pipGraph2.PipTable.PipNameTable.GetText(pipGraph2.PipTable[pipId].Name));
+
+            WorkerId workerId = pipGraph2.WorkerTable.Ids.First();
+            XAssert.AreEqual(workerName, new string(pipGraph2.StringTable[pipGraph2.WorkerTable[workerId]]));
         }
     }
 }

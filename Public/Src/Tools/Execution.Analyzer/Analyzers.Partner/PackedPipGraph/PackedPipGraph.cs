@@ -54,11 +54,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable = new StringTable();
             PipTable = new PipTable(StringTable);
             FileTable = new FileTable(StringTable);
+            WorkerTable = new WorkerTable(StringTable);
         }
 
         private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.bin";
         private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
         private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
+        private static readonly string s_workerTableFileName = $"{nameof(WorkerTable)}.bin";
         private static readonly string s_pipDependenciesFileName = $"{nameof(PipDependencies)}.bin";
 
         /// <summary>
@@ -74,6 +76,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable.SaveToFile(directory, s_stringTableFileName);
             PipTable.SaveToFile(directory, s_pipTableFileName);
             FileTable.SaveToFile(directory, s_fileTableFileName);
+            WorkerTable.SaveToFile(directory, s_workerTableFileName);
 
             if (PipDependencies != null)
             {
@@ -86,6 +89,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             StringTable.LoadFromFile(directory, s_stringTableFileName);
             PipTable.LoadFromFile(directory, s_pipTableFileName);
             FileTable.LoadFromFile(directory, s_fileTableFileName);
+            WorkerTable.LoadFromFile(directory, s_workerTableFileName);
 
             if (File.Exists(Path.Combine(directory, s_pipDependenciesFileName)))
             {
@@ -100,6 +104,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
             public readonly StringTable.CachingBuilder StringTableBuilder;
             public readonly PipTable.Builder PipTableBuilder;
             public readonly FileTable.CachingBuilder FileTableBuilder;
+            public readonly WorkerTable.CachingBuilder WorkerTableBuilder;
 
             public Builder(PackedPipGraph pipGraph)
             {
@@ -107,13 +112,8 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                 StringTableBuilder = new StringTable.CachingBuilder(PipGraph.StringTable);
                 PipTableBuilder = new PipTable.Builder(PipGraph.PipTable, StringTableBuilder);
                 FileTableBuilder = new FileTable.CachingBuilder(PipGraph.FileTable, StringTableBuilder);
+                WorkerTableBuilder = new WorkerTable.CachingBuilder(PipGraph.WorkerTable, StringTableBuilder);
             }
-
-            public PipId Add(long semiStableHash, string name, PipType pipType)
-                => PipTableBuilder.Add(semiStableHash, name, pipType);
-
-            public FileId GetOrAddFile(string name, long sizeInBytes)
-                => FileTableBuilder.GetOrAdd(name, sizeInBytes);
         }
     }
 }
