@@ -14,7 +14,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     public class PackedPipGraph
     {
         /// <summary>
-        /// The collection of all strings from the whole graph.
+        /// The strings (all of them, from everything).
         /// </summary>
         /// <remarks>
         /// Case-sensitive.
@@ -22,19 +22,24 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         public readonly StringTable StringTable;
 
         /// <summary>
-        /// The set of all pips.
+        /// The pips.
         /// </summary>
         public readonly PipTable PipTable;
 
         /// <summary>
-        /// The set of all files.
+        /// The files.
         /// </summary>
         public readonly FileTable FileTable;
 
         /// <summary>
+        /// The workers.
+        /// </summary>
+        public readonly WorkerTable WorkerTable;
+
+        /// <summary>
         /// The dependency relation (from the dependent, towards the dependency).
         /// </summary>
-        public RelationTable<PipId, PipId, PipTable, PipTable> PipDependencies { get; private set; }
+        public RelationTable<PipId, PipId> PipDependencies { get; private set; }
 
         /// <summary>
         /// Construct a PackedPipGraph with empty base tables.
@@ -61,7 +66,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// </summary>
         public void ConstructRelationTables()
         {
-            PipDependencies = new RelationTable<PipId, PipId, PipTable, PipTable>(PipTable, PipTable);
+            PipDependencies = new RelationTable<PipId, PipId>(PipTable, PipTable);
         }
 
         public void SaveToDirectory(string directory)

@@ -9,15 +9,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
     /// Represents one-to-many relationship between two tables.
     /// </summary>
     /// <remarks>
-    /// The RelationTable is a MultiValueTable which stores relations (TToIds) between the TFromTable and the TToTable.
+    /// The RelationTable is a MultiValueTable which stores relations between the BaseTableOpt and the RelatedTable.
     /// </remarks>
-    public class RelationTable<TFromId, TToId, TFromTable, TToTable> : MultiValueTable<TFromId, TToId>
+    public class RelationTable<TFromId, TToId> : MultiValueTable<TFromId, TToId>
         where TFromId : unmanaged, Id<TFromId>
         where TToId : unmanaged, Id<TToId>
-        where TFromTable : ITable<TFromId>
-        where TToTable : ITable<TToId>
     {
-        public readonly TToTable RelatedTable;
+        public readonly ITable<TToId> RelatedTable;
 
         /// <summary>
         /// Construct a RelationTable between baseTable and relatedTable.
@@ -27,7 +25,7 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// or this table will not be able to preallocate its id table properly.
         /// TODO: remove this restriction.
         /// </remarks>
-        public RelationTable(TFromTable baseTable, TToTable relatedTable) : base(baseTable)
+        public RelationTable(ITable<TFromId> baseTable, ITable<TToId> relatedTable) : base(baseTable)
         {
             RelatedTable = relatedTable;
         }
@@ -78,10 +76,13 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
         /// <summary>
         /// Create a new RelationTable that is the inverse of this relation.
         /// </summary>
-        public RelationTable<TToId, TFromId, TToTable, TFromTable> Invert()
+        /// <remarks>
+        /// Very useful for calculating, for example, pip dependents based on pip dependencies, or
+        /// per-file producers based on per-pip files produced.
+        /// </remarks>
+        public RelationTable<TToId, TFromId> Invert()
         {
-            RelationTable<TToId, TFromId, TToTable, TFromTable> result =
-                new RelationTable<TToId, TFromId, TToTable, TFromTable>(RelatedTable, (TFromTable)BaseTableOpt);
+            RelationTable<TToId, TFromId> result = new RelationTable<TToId, TFromId>(RelatedTable, BaseTableOpt);
 
             // We will use result.Values to accumulate the counts as usual.
             result.SingleValues.Fill(RelatedTable.Count, 0);
@@ -123,13 +124,15 @@ namespace BuildXL.Execution.Analyzers.PackedPipGraph
                     positions[relatedIdInt]++;
                     if (positions[relatedIdInt] > result.SingleValues[relatedIdInt])
                     {
+                        // this is a logic bug, should never happen
                         throw new Exception(
                             $"RelationTable.Inverse: logic exception: positions[{relatedIdInt}] = {positions[relatedIdInt]}, result.SingleValues[{relatedIdInt}] = {result.SingleValues[relatedIdInt]}");
                     }
                     else if (positions[relatedIdInt] == result.SingleValues[relatedIdInt])
                     {
                         // all the relations for this ID are known. now, we have to sort them.
-                        Span<TFromId> finalSpan = result.MultiValues.AsSpan().Slice(result.Offsets[relatedIdInt], result.SingleValues[relatedIdInt]);
+                        Span<TFromId> finalSpan = 
+                            result.MultiValues.AsSpan().Slice(result.Offsets[relatedIdInt], result.SingleValues[relatedIdInt]);
                         SpanUtilities.Sort(finalSpan, (id1, id2) => id1.FromId().CompareTo(id2.FromId()));
                     }
                 }

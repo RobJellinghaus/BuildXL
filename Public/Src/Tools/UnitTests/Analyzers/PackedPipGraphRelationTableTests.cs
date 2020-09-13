@@ -26,7 +26,7 @@ namespace Test.Tool.Analyzers
 
             pipGraph.ConstructRelationTables();
 
-            RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
+            RelationTable<PipId, PipId> relationTable = pipGraph.PipDependencies;
 
             relationTable.Add(new[] { pipId }.AsSpan());
 
@@ -35,7 +35,7 @@ namespace Test.Tool.Analyzers
             ReadOnlySpan<PipId> relations = relationTable[pipId];
             XAssert.AreEqual(pipId, relations[0]);
 
-            RelationTable<PipId, PipId, PipTable, PipTable> inverseRelationTable = relationTable.Invert();
+            RelationTable<PipId, PipId> inverseRelationTable = relationTable.Invert();
 
             XAssert.AreEqual(1, inverseRelationTable[pipId].Length);
             XAssert.AreEqual(pipId, inverseRelationTable[pipId][0]);
@@ -58,7 +58,7 @@ namespace Test.Tool.Analyzers
 
             pipGraph.ConstructRelationTables();
 
-            RelationTable<PipId, PipId, PipTable, PipTable> relationTable = pipGraph.PipDependencies;
+            RelationTable<PipId, PipId> relationTable = pipGraph.PipDependencies;
 
             relationTable.Add(new[] { pipId2, pipId3 }.AsSpan());
 
@@ -79,7 +79,7 @@ namespace Test.Tool.Analyzers
             XAssert.AreArraysEqual(new[] { pipId2, pipId3 }, relationTable[pipId].ToArray(), true);
             XAssert.AreArraysEqual(new[] { pipId, pipId2, pipId3 }, relationTable[pipId3].ToArray(), true);
 
-            RelationTable<PipId, PipId, PipTable, PipTable> inverseRelationTable = relationTable.Invert();
+            RelationTable<PipId, PipId> inverseRelationTable = relationTable.Invert();
 
             XAssert.AreArraysEqual(new[] { pipId2, pipId3 }, inverseRelationTable[pipId].ToArray(), true);
             XAssert.AreArraysEqual(new[] { pipId, pipId3 }, inverseRelationTable[pipId2].ToArray(), true);

@@ -60,7 +60,7 @@ namespace BuildXL.Execution.Analyzer
             writer.WriteBanner("Packed Pip Graph Exporter");
             writer.WriteModeOption(nameof(AnalysisMode.PackedPipGraphExporter), "Exports the pip graph and execution data in PackedPipGraph form");
             writer.WriteLine("Required");
-            writer.WriteOption(OutputDirectoryOption, "The location of the output file.");
+            writer.WriteOption(OutputDirectoryOption, "The location of the output directory.");
         }
     }
 
@@ -175,7 +175,7 @@ namespace BuildXL.Execution.Analyzer
         public void AddPipDependencies(
             G_PipId g_pipId, 
             PipReference pipReference,
-            RelationTable<G_PipId, G_PipId, G_PipTable, G_PipTable> relationTable,
+            RelationTable<G_PipId, G_PipId> relationTable,
             SpannableList<G_PipId> buffer)
         {
             IEnumerable<G_PipId> pipDependencies = PipGraph
