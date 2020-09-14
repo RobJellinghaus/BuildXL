@@ -86,5 +86,11 @@ namespace Test.Tool.Analyzers
             XAssert.AreArraysEqual(new[] { pipId, pipId3 }, inverseRelationTable[pipId2].ToArray(), true);
             XAssert.AreArraysEqual(new[] { pipId, pipId3 }, inverseRelationTable[pipId3].ToArray(), true);
         }
+
+        [Fact]
+        public void RelationTable_can_be_built()
+        {
+
+        }
     }
 }

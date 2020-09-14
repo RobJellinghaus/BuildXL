@@ -4,6 +4,7 @@
 using BuildXL.Execution.Analyzers.PackedTable;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.ContractsLight;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -32,16 +33,20 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         public readonly NameId Path;
         public readonly long SizeInBytes;
         public readonly PipId ProducerPip;
-        public FileEntry(NameId name, long sizeInBytes, PipId producerPip)
+        public readonly ContentFlags ContentFlags;
+
+        public FileEntry(NameId name, long sizeInBytes, PipId producerPip, ContentFlags contentFlags)
         { 
             Path = name;
             SizeInBytes = sizeInBytes;
             ProducerPip = producerPip;
+            ContentFlags = contentFlags;
         }
 
-        public FileEntry WithName(NameId name) { return new FileEntry(name, SizeInBytes, ProducerPip); }
-        public FileEntry WithSizeInBytes(long sizeInBytes) { return new FileEntry(Path, sizeInBytes, ProducerPip); }
-        public FileEntry WithProducerPip(PipId producerPip) { return new FileEntry(Path, SizeInBytes, producerPip); }
+        public FileEntry WithName(NameId name) { return new FileEntry(name, SizeInBytes, ProducerPip, ContentFlags); }
+        public FileEntry WithSizeInBytes(long sizeInBytes) { return new FileEntry(Path, sizeInBytes, ProducerPip, ContentFlags); }
+        public FileEntry WithProducerPip(PipId producerPip) { return new FileEntry(Path, SizeInBytes, producerPip, ContentFlags); }
+        public FileEntry WithContentFlags(ContentFlags contentFlags) { return new FileEntry(Path, SizeInBytes, ProducerPip, contentFlags); }
 
         public struct EqualityComparer : IEqualityComparer<FileEntry>
         {
@@ -88,13 +93,34 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             /// The only time that value can be set is when adding a new file not previously recorded.
             /// TODO: consider failing if this happens?
             /// </remarks>
-            public FileId GetOrAdd(string filePath, long sizeInBytes, PipId producerPip)
+            public FileId GetOrAdd(string filePath, long sizeInBytes, PipId producerPip, ContentFlags contentFlags)
             {
                 FileEntry entry = new FileEntry(
                     PathTableBuilder.GetOrAdd(filePath),
                     sizeInBytes,
-                    producerPip);
-                return GetOrAdd(entry);
+                    producerPip,
+                    contentFlags);
+                return GetOrAdd(entry, (oldEntry, newEntry) =>
+                {
+                    // Produced > MaterializedFromCache > Materialized.
+                    ContentFlags oldFlags = oldEntry.ContentFlags;
+                    ContentFlags newFlags = newEntry.ContentFlags;
+                    bool eitherProduced = ((oldFlags & ContentFlags.Produced) != 0 || (newFlags & ContentFlags.Produced) != 0);
+                    bool eitherMaterializedFromCache = ((oldFlags & ContentFlags.MaterializedFromCache) != 0 || (newFlags & ContentFlags.MaterializedFromCache) != 0);
+                    bool eitherMaterialized = ((oldFlags & ContentFlags.Materialized) != 0 || (newFlags & ContentFlags.Materialized) != 0);
+
+                    // System should never tell us the file was both produced and materialized from cache
+                    Contract.Assert(!(eitherProduced && eitherMaterializedFromCache));
+
+                    return newEntry.WithContentFlags(
+                        eitherProduced
+                            ? ContentFlags.Produced
+                            : eitherMaterializedFromCache
+                                ? ContentFlags.MaterializedFromCache
+                                : eitherMaterialized
+                                    ? ContentFlags.Materialized
+                                    : default(ContentFlags));
+                });
             }
         }
     }

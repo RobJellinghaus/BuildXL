@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace BuildXL.Execution.Analyzers.PackedTable
@@ -79,10 +80,12 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                 }
             }
 
-            public virtual TId GetOrAdd(TValue value)
+            public virtual TId GetOrAdd(TValue value, Func<TValue, TValue, TValue> optCombiner = null)
             {
                 if (Entries.TryGetValue(value, out TId id))
                 {
+                    TValue updated = optCombiner == null ? ValueTable[id] : optCombiner(ValueTable[id], value);
+                    ValueTable[id] = updated;
                     return id;
                 }
                 else

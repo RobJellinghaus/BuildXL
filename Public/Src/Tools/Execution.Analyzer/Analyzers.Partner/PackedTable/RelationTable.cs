@@ -142,5 +142,71 @@ namespace BuildXL.Execution.Analyzers.PackedTable
 
             return result;
         }
+
+        /// <summary>
+        /// Build a Relation by adding unordered (from, to) tuples, and then finally completing the collection, which sorts
+        /// and populates the Relation.
+        /// </summary>
+        public class Builder
+        {
+            public readonly RelationTable<TFromId, TToId> Table;
+
+            private readonly SpannableList<(TFromId fromId, TToId toId)> m_list;
+
+            public Builder(RelationTable<TFromId, TToId> table, int capacity = DefaultCapacity)
+            {
+                Table = table;
+                m_list = new SpannableList<(TFromId, TToId)>(capacity);
+            }
+
+            public void Add(TFromId fromId, TToId toId)
+            {
+                m_list.Add((fromId, toId));
+            }
+
+            public void Complete()
+            {
+                m_list.AsSpan().Sort((tuple1, tuple2) =>
+                {
+                    int fromIdCompare = tuple1.fromId.FromId().CompareTo(tuple2.fromId.FromId());
+                    if (fromIdCompare != 0)
+                    {
+                        return fromIdCompare;
+                    }
+                    return tuple1.toId.FromId().CompareTo(tuple2.toId.FromId());
+                });
+
+                // and bin them by groups
+                int listIndex = 0;
+                SpannableList<TToId> buffer = new SpannableList<TToId>();
+                Table.SetMultiValueCapacity(m_list.Count);
+
+                foreach (TFromId id in Table.BaseTableOpt.Ids)
+                {
+                    if (listIndex >= m_list.Count)
+                    {
+                        // ran outta entries, rest all 0
+                        break;
+                    }
+
+                    // Count up how many are for this ID.
+                    int count = 0;
+                    buffer.Clear();
+                    while (listIndex + count < m_list.Count)
+                    {
+                        var value = m_list[listIndex + count];
+                        if (value.fromId.Equals(id))
+                        {
+                            buffer.Add(value.toId);
+                            continue;
+                        }
+                        // ok we're done
+                        break;
+                    }
+
+                    Table.Add(buffer.AsSpan());
+                }
+            }
+        }
     }
 }

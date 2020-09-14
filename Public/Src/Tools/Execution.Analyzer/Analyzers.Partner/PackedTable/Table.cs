@@ -34,6 +34,12 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// </summary>
         protected SpannableList<TValue> SingleValues;
 
+        public int Capacity
+        {
+            get => SingleValues.Capacity;
+            set => SingleValues.Capacity = value;
+        }
+
         /// <summary>
         /// The number of IDs stored in this table.
         /// </summary>

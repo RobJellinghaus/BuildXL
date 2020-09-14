@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using BuildXL.Execution.Analyzers.PackedTable;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.Diagnostics.ContractsLight;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -121,6 +123,8 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         /// </summary>
         public void ConstructRelationTables()
         {
+            System.Diagnostics.ContractsLight.Contract.Requires(ConsumedFiles == null, "Must only construct relation tables once");
+
             ConsumedFiles = new RelationTable<PipId, FileId>(PipTable, FileTable);
             DeclaredInputDirectories = new RelationTable<PipId, DirectoryId>(PipTable, DirectoryTable);
             DeclaredInputFiles = new RelationTable<PipId, FileId>(PipTable, FileTable);
@@ -183,9 +187,15 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             public readonly StringTable.CachingBuilder StringTableBuilder;
             public readonly WorkerTable.CachingBuilder WorkerTableBuilder;
 
-            public Builder(PackedExecution pipGraph)
+            public readonly RelationTable<PipId, FileId>.Builder ConsumedFilesBuilder;
+            public readonly RelationTable<PipId, DirectoryId>.Builder DeclaredInputDirectoriesBuilder;
+            public readonly RelationTable<PipId, FileId>.Builder DeclaredInputFilesBuilder;
+            public readonly RelationTable<DirectoryId, FileId>.Builder DirectoryContentsBuilder;
+            public readonly RelationTable<PipId, PipId>.Builder PipDependenciesBuilder;
+
+            public Builder(PackedExecution packedExecution)
             {
-                PackedExecution = pipGraph;
+                PackedExecution = packedExecution;
 
                 // these are sorted as much as possible given construction order constraints
                 StringTableBuilder = new StringTable.CachingBuilder(PackedExecution.StringTable);
@@ -194,6 +204,15 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
                 FileTableBuilder = new FileTable.CachingBuilder(PackedExecution.FileTable, PathTableBuilder);
                 PipTableBuilder = new PipTable.Builder(PackedExecution.PipTable, StringTableBuilder);
                 WorkerTableBuilder = new WorkerTable.CachingBuilder(PackedExecution.WorkerTable, StringTableBuilder);
+
+                if (packedExecution.ConsumedFiles != null)
+                {
+                    ConsumedFilesBuilder = new RelationTable<PipId, FileId>.Builder(packedExecution.ConsumedFiles);
+                    DeclaredInputDirectoriesBuilder = new RelationTable<PipId, DirectoryId>.Builder(packedExecution.DeclaredInputDirectories);
+                    DeclaredInputFilesBuilder = new RelationTable<PipId, FileId>.Builder(packedExecution.DeclaredInputFiles);
+                    DirectoryContentsBuilder = new RelationTable<DirectoryId, FileId>.Builder(packedExecution.DirectoryContents);
+                    PipDependenciesBuilder = new RelationTable<PipId, PipId>.Builder(packedExecution.PipDependencies);
+                }
             }
         }
     }
