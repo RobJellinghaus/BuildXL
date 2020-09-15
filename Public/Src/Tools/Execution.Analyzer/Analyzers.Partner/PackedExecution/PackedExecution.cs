@@ -44,6 +44,18 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         public readonly PipTable PipTable;
 
         /// <summary>
+        /// The pip executions.
+        /// </summary>
+        /// <remarks>
+        /// Currently this is stored sparsely -- most entries will be empty (uninitialized), since most pips are not
+        /// process pips (and if they are, may not get executed).
+        /// 
+        /// TODO: keep an eye on space usage here, and either support sparse derived tables, or make this data its own
+        /// base table and add a joining relation to the pip table.
+        /// </remarks>
+        public readonly PipExecutionTable PipExecutionTable;
+
+        /// <summary>
         /// The strings.
         /// </summary>
         /// <remarks>
@@ -102,6 +114,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             DirectoryTable = new DirectoryTable(PathTable);
             FileTable = new FileTable(PathTable);
             PipTable = new PipTable(StringTable);
+            PipExecutionTable = new PipExecutionTable(PipTable);
             WorkerTable = new WorkerTable(StringTable);
         }
 
@@ -109,6 +122,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         private static readonly string s_fileTableFileName = $"{nameof(FileTable)}.bin";
         private static readonly string s_pathTableFileName = $"{nameof(PathTable)}.bin";
         private static readonly string s_pipTableFileName = $"{nameof(PipTable)}.bin";
+        private static readonly string s_pipExecutionTableFileName = $"{nameof(PipExecutionTable)}.bin";
         private static readonly string s_stringTableFileName = $"{nameof(StringTable)}.bin";
         private static readonly string s_workerTableFileName = $"{nameof(WorkerTable)}.bin";
 
@@ -138,6 +152,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             FileTable.SaveToFile(directory, s_fileTableFileName);
             PathTable.SaveToFile(directory, s_pathTableFileName);
             PipTable.SaveToFile(directory, s_pipTableFileName);
+            PipExecutionTable.SaveToFile(directory, s_pipExecutionTableFileName);
             StringTable.SaveToFile(directory, s_stringTableFileName);
             WorkerTable.SaveToFile(directory, s_workerTableFileName);
 
@@ -154,6 +169,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             FileTable.LoadFromFile(directory, s_fileTableFileName);
             PathTable.LoadFromFile(directory, s_pathTableFileName);
             PipTable.LoadFromFile(directory, s_pipTableFileName);
+            PipExecutionTable.LoadFromFile(directory, s_pipExecutionTableFileName);
             StringTable.LoadFromFile(directory, s_stringTableFileName);
             WorkerTable.LoadFromFile(directory, s_workerTableFileName);
 
@@ -184,6 +200,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
             public readonly FileTable.CachingBuilder FileTableBuilder;
             public readonly NameTable.Builder PathTableBuilder;
             public readonly PipTable.Builder PipTableBuilder;
+            // There is deliberately no PipExecutionTableBuilder; just call FillToBaseTableCount on it and then set values in it.
             public readonly StringTable.CachingBuilder StringTableBuilder;
             public readonly WorkerTable.CachingBuilder WorkerTableBuilder;
 
@@ -202,7 +219,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
                 PathTableBuilder = new NameTable.Builder(PackedExecution.PathTable, StringTableBuilder);
                 DirectoryTableBuilder = new DirectoryTable.CachingBuilder(PackedExecution.DirectoryTable, PathTableBuilder);
                 FileTableBuilder = new FileTable.CachingBuilder(PackedExecution.FileTable, PathTableBuilder);
-                PipTableBuilder = new PipTable.Builder(PackedExecution.PipTable, StringTableBuilder);
+                PipTableBuilder = new PipTable.Builder(PackedExecution.PipTable, StringTableBuilder);               
                 WorkerTableBuilder = new WorkerTable.CachingBuilder(PackedExecution.WorkerTable, StringTableBuilder);
 
                 if (packedExecution.ConsumedFiles != null)

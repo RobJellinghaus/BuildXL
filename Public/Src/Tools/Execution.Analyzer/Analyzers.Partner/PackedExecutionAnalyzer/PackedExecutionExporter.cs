@@ -301,6 +301,9 @@ namespace BuildXL.Execution.Analyzer
             }
 
             Console.WriteLine($"PackedExecutionExporter: Added {PipGraph.PipCount} pips at {DateTime.Now}.");
+
+
+
             return pipList;
         }
 
@@ -444,10 +447,6 @@ namespace BuildXL.Execution.Analyzer
         /// </remarks>
         private class WorkerAnalyzer
         {
-            private readonly WorkerId m_workerId;
-            private readonly PackedExecutionExporter m_exporter;
-            private readonly ActionBlockSlim<ProcessFingerprintComputationEventData> m_processingBlock;
-
             /// <summary>
             /// The information about an executed process pip.
             /// </summary>
@@ -481,6 +480,21 @@ namespace BuildXL.Execution.Analyzer
                     Worker = worker;
                 }
             }
+
+            /// <summary>
+            /// ID of this analyzer's worker.
+            /// </summary>
+            private readonly WorkerId m_workerId;
+
+            /// <summary>
+            /// The parent exporter.
+            /// </summary>
+            private readonly PackedExecutionExporter m_exporter;
+
+            /// <summary>
+            /// This analyzer's concurrency manager.
+            /// </summary>
+            private readonly ActionBlockSlim<ProcessFingerprintComputationEventData> m_processingBlock;
 
             /// <summary>
             /// Each WorkerAnalyzer collects its own partial relations and merges them when complete.
@@ -540,7 +554,8 @@ namespace BuildXL.Execution.Analyzer
                     .Select(input => input.Path)
                     .ToList();
 
-                ProcessPipInfoList.Add(new ProcessPipInfo(new P_PipId((int)data.PipId.Value), declaredInputFiles, declaredInputDirs, consumedPaths, m_workerId));
+                P_PipId packedPipId = new P_PipId((int)data.PipId.Value);
+                ProcessPipInfoList.Add(new ProcessPipInfo(packedPipId, declaredInputFiles, declaredInputDirs, consumedPaths, m_workerId));
             }
 
             #endregion

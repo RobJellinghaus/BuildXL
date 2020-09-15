@@ -155,6 +155,7 @@ namespace BuildXL.Execution.Analyzers.PackedTable
 
             public Builder(RelationTable<TFromId, TToId> table, int capacity = DefaultCapacity)
             {
+                if (table == null) { throw new ArgumentException("Table argument must not be null"); }
                 Table = table;
                 m_list = new SpannableList<(TFromId, TToId)>(capacity);
             }
@@ -179,7 +180,8 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                 // and bin them by groups
                 int listIndex = 0;
                 SpannableList<TToId> buffer = new SpannableList<TToId>();
-                Table.SetMultiValueCapacity(m_list.Count);
+                int listCount = m_list.Count;
+                Table.SetMultiValueCapacity(listCount);
 
                 foreach (TFromId id in Table.BaseTableOpt.Ids)
                 {
@@ -198,6 +200,7 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                         if (value.fromId.Equals(id))
                         {
                             buffer.Add(value.toId);
+                            count++;
                             continue;
                         }
                         // ok we're done
@@ -205,6 +208,7 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                     }
 
                     Table.Add(buffer.AsSpan());
+                    listIndex += count;
                 }
             }
         }

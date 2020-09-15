@@ -160,6 +160,27 @@ namespace BuildXL.Execution.Analyzers.PackedTable
             return default(TId).ToId(Count);
         }
 
+        public override void FillToBaseTableCount()
+        {
+            base.FillToBaseTableCount();
+
+            if (BaseTableOpt.Count > Count)
+            {
+                int lastOffsetValue = 0;
+                if (Offsets.Count > 0)
+                {
+                    lastOffsetValue = Offsets[Offsets.Count - 1];
+                }
+                Offsets.Fill(BaseTableOpt.Count - Count, lastOffsetValue);
+            }
+        }
+
+        /// <summary>
+        /// Return a string showing the full contents of the table.
+        /// </summary>
+        /// <remarks>
+        /// FOR UNIT TESTING ONLY! Will OOM your machine if you call this on a really large table.
+        /// </remarks>
         public string ToFullString() => $"SingleValues {SingleValues.ToFullString()}, m_offsets {Offsets.ToFullString()}, m_multiValues {MultiValues.ToFullString()}";
     }
 }

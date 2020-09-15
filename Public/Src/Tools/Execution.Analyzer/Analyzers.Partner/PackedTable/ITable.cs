@@ -57,5 +57,17 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// table.
         /// </remarks>
         ITable<TId> BaseTableOpt { get; }
+
+        /// <summary>
+        /// Fill this table to have as many (default-value) entries as BaseTableOpt.
+        /// </summary>
+        /// <remarks>
+        /// It is an error to call this on a table with no BaseTableOpt set.
+        /// 
+        /// This method is used when a base table gets populated before a derived table,
+        /// and the derived table may get populated in random order, so needs to be
+        /// the same size as the base table.
+        /// </remarks>
+        void FillToBaseTableCount();
     }
 }

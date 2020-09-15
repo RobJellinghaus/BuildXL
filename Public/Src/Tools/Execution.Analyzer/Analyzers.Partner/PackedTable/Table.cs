@@ -71,6 +71,26 @@ namespace BuildXL.Execution.Analyzers.PackedTable
             if (!IsValid(id)) { throw new ArgumentException($"ID {id} is not valid for table with Count {Count}"); }
         }
 
+        /// <summary>
+        /// Fill this table with default values, to the same count as the base table.
+        /// </summary>
+        /// <remarks>
+        /// This method throws an exception if called on a table with no BaseTableOpt value.
+        /// 
+        /// The purpose of this method is to support the scenario in which a base table gets fully populated before
+        /// a derived table, and the derived table is going to be populated in random order, hence needs to have
+        /// a full count of initial (default-valued) values.
+        /// </remarks>
+        public virtual void FillToBaseTableCount()
+        {
+            if (BaseTableOpt == null) { throw new ArgumentException("FillToBaseTableCount() must only be called on tables with a base table (e.g. non-null BaseTableOpt)"); }
+
+            if (BaseTableOpt.Count > Count)
+            {
+                SingleValues.Fill(BaseTableOpt.Count - Count, default);
+            }
+        }
+
         public virtual void SaveToFile(string directory, string name)
         {
             FileSpanUtilities.SaveToFile(directory, name, SingleValues);
@@ -85,6 +105,8 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// Add the given suffix to the filename, preserving extension.
         /// </summary>
         /// <remarks>
+        /// This is used by save and load methods in derived types.
+        /// 
         /// For example, if this table is a MultiValuesTable and path is "foo.bin",
         /// the derived implementation may call this with "foo.bin" and "MultiValues",
         /// and will get "foo.MultiValues.bin" back.
