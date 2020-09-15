@@ -111,7 +111,7 @@ namespace BuildXL.Execution.Analyzer
         /// <summary>
         /// List of paths to decided files (either materialized from cache, or produced).
         /// </summary>
-        private readonly List<AbsolutePath> m_decidedFiles = new List<AbsolutePath>();
+        private readonly HashSet<AbsolutePath> m_decidedFiles = new HashSet<AbsolutePath>();
 
         /// <summary>
         /// Upwards index from files to their containing director(ies).
@@ -175,14 +175,15 @@ namespace BuildXL.Execution.Analyzer
                         // PipOutputOrigin.UpToDate - not relevant to this analyzer
                 }
 
+                // TODO: evaluate optimizing this with a direct hierarchical BXL-Path-to-PackedTable-Name mapping
                 FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(
-                    data.FileArtifact.Path.ToString(), 
+                    data.FileArtifact.Path.ToString(PathTable).ToCanonicalizedPath(),
                     data.FileContentInfo.Length, 
                     default,
                     contentFlags);
 
                 // And save the FileId and the FileArtifact for later use when searching for producing pips.
-                m_pathsToFiles.Add(data.FileArtifact.Path, (fileId, data.FileArtifact));
+                m_pathsToFiles[data.FileArtifact.Path] = (fileId, data.FileArtifact);
 
                 m_decidedFiles.Add(data.FileArtifact.Path);
             }
@@ -213,7 +214,7 @@ namespace BuildXL.Execution.Analyzer
             foreach (var kvp in data.DirectoryOutputs)
             {
                 DirectoryId directoryId = m_packedExecutionBuilder.DirectoryTableBuilder.GetOrAdd(
-                    kvp.directoryArtifact.Path.ToString(),
+                    kvp.directoryArtifact.Path.ToString(PathTable).ToCanonicalizedPath(),
                     default,
                     default);
 
@@ -224,7 +225,9 @@ namespace BuildXL.Execution.Analyzer
                     // BXL: Is there an invariant that FileArtifactContentDecided will be called for a given file
                     // before PipExecutionDirectoryOutputs will be called for the directory containing that file?
                     // (If so, this can just be a lookup in m_pathsToFiles, instead of a GetOrAdd for a possibly new file.)
-                    FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(fileArtifact.Path.ToString(), default, default, default);
+                    FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(
+                        fileArtifact.Path.ToString(PathTable).ToCanonicalizedPath(),
+                        default, default, default);
 
                     m_pathsToFiles[fileArtifact.Path] = (fileId, fileArtifact);
 
