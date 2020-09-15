@@ -401,7 +401,7 @@ namespace BuildXL.Execution.Analyzer
             // set file producer
             Parallel.ForEach(
                 m_decidedFiles,
-                new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                new ParallelOptions() { MaxDegreeOfParallelism = 1 }, // B4PR: Environment.ProcessorCount },
                 path =>
                 {
                     var tuple = m_pathsToFiles[path];
@@ -424,12 +424,18 @@ namespace BuildXL.Execution.Analyzer
                         }
                     }
 
-                    // Theoretically this is safe if we never update the same file twice with different producers.
-                    // BXL: should we have an interlock to guard against this?
-                    // BXL: can a file have multiple producers legitimately? (PipGraph has some kind of method for getting all producers of a file)
-                    FileEntry entry = m_packedExecution.FileTable[tuple.fileId];
-                    Contract.Assert(entry.ProducerPip.Equals(default), $"Should not have set producer pip {entry.ProducerPip} yet for file {m_packedExecution.PathTable.GetText(entry.Path)}");
-                    m_packedExecution.FileTable[tuple.fileId] = entry.WithProducerPip(new P_PipId((int)producer.Value));
+                    if (producer.IsValid)
+                    {
+                        // Theoretically this is safe if we never update the same file twice with different producers.
+                        // BXL: should we have an interlock to guard against this?
+                        // BXL: can a file have multiple producers legitimately? (PipGraph has some kind of method for getting all producers of a file)
+                        FileEntry entry = m_packedExecution.FileTable[tuple.fileId];
+
+                        Contract.Assert(entry.ProducerPip.Equals(default(P_PipId)),
+                            $"Should not have set producer pip {entry.ProducerPip} yet for file {m_packedExecution.PathTable.GetText(entry.Path)}");
+
+                        m_packedExecution.FileTable[tuple.fileId] = entry.WithProducerPip(new P_PipId((int)producer.Value));
+                    }
                 });
 
             Console.WriteLine($"PackedExecutionExporter: Analyzed {m_decidedFiles.Count} decided files (to determine their producers) at {DateTime.Now}.");
