@@ -179,9 +179,11 @@ namespace BuildXL.Execution.Analyzer
         {
             Console.WriteLine($"FileConsumptionAnalyzer: Starting analysis at {DateTime.Now}.");
 
+            int totalDeclaredInputFiles = 0, totalDeclaredInputDirectories = 0, totalConsumedFiles = 0;
+
             Parallel.ForEach(
                 m_executedProcessPips.Keys,
-                new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                new ParallelOptions() { MaxDegreeOfParallelism = 1 },//Environment.ProcessorCount },
                 pipId =>
                 {
                     var pip = m_executedProcessPips[pipId];
@@ -212,6 +214,7 @@ namespace BuildXL.Execution.Analyzer
                                 pip.Worker.AddFlag(path, ContentFlag.Materialized);
                             }
                         }
+                        totalDeclaredInputFiles += pip.DeclaredInputFiles.Count;
 
                         foreach (var directoryArtifact in pip.DeclaredInputDirectories)
                         {
@@ -228,6 +231,7 @@ namespace BuildXL.Execution.Analyzer
                                 }
                             }
                         }
+                        totalDeclaredInputDirectories += pip.DeclaredInputDirectories.Count;
 
                         foreach (var path in pip.ConsumedFiles)
                         {
@@ -248,6 +252,7 @@ namespace BuildXL.Execution.Analyzer
                                 }
                             }
                         }
+                        totalConsumedFiles += pip.ConsumedFiles.Count;
 
                         pip.ConsumedInputSize = totalConsumedSize;
                         pip.DeclaredInputSize = totalInputSize;
@@ -262,7 +267,7 @@ namespace BuildXL.Execution.Analyzer
                     }
                 });
 
-            Console.WriteLine($"FileConsumptionAnalyzer: Analyzed {m_executedProcessPips.Count} executed process pips at {DateTime.Now}.");
+            Console.WriteLine($"PackedExecutionExporter: Analyzed {m_executedProcessPips.Count} executed process pips ({totalDeclaredInputFiles} declared input files, {totalDeclaredInputDirectories} declared input directories, {totalConsumedFiles} consumed files) at {DateTime.Now}.");
 
             // set file producer
             Parallel.ForEach(

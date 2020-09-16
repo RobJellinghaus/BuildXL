@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace BuildXL.Execution.Analyzers.PackedTable
 {
@@ -24,5 +26,10 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// Add this value to the end of the Table.
         /// </summary>
         TId Add(ReadOnlySpan<TValue> value);
+
+        /// <summary>
+        /// Enumerate the values (if any) at the given ID.
+        /// </summary>
+        IEnumerable<TValue> Enumerate(TId id);
     }
 }

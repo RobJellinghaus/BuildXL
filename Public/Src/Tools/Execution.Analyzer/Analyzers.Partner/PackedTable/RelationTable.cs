@@ -155,8 +155,7 @@ namespace BuildXL.Execution.Analyzers.PackedTable
 
             public Builder(RelationTable<TFromId, TToId> table, int capacity = DefaultCapacity)
             {
-                if (table == null) { throw new ArgumentException("Table argument must not be null"); }
-                Table = table;
+                Table = table ?? throw new ArgumentException("Table argument must not be null");
                 m_list = new SpannableList<(TFromId, TToId)>(capacity);
             }
 
@@ -200,17 +199,17 @@ namespace BuildXL.Execution.Analyzers.PackedTable
 
                     while (listIndex + count < m_list.Count)
                     {
-                        var value = m_list[listIndex + count];
-                        if (value.fromId.Equals(id))
+                        var (fromId, toId) = m_list[listIndex + count];
+                        if (fromId.Equals(id))
                         {
                             // drop duplicates (silently...)
                             // TODO: are duplicates here a logic bug? Because they do happen in practice.
-                            if (!value.toId.Equals(lastToId))
+                            if (!toId.Equals(lastToId))
                             {
-                                buffer.Add(value.toId);
+                                buffer.Add(toId);
                             }
                             count++;
-                            lastToId = value.toId;
+                            lastToId = toId;
                             continue;
                         }
                         // ok we're done

@@ -136,10 +136,29 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         private class SpannableListEnumerator : IEnumerator<T>
         {
             private readonly SpannableList<T> m_list;
-            private int m_index = 0;
-            internal SpannableListEnumerator(SpannableList<T> list)
+            private int m_index;
+            private readonly int m_initialIndex;
+            private readonly int m_maxIndex;
+            internal SpannableListEnumerator(SpannableList<T> list, int index = 0, int count = -1)
             {
+                if (index < 0 || index > list.Count)
+                {
+                    throw new ArgumentException($"Cannot construct enumerator over list with {list.Count} elements (index {index}, count {count}");
+                }
+
+                if (count == -1)
+                {
+                    count = list.Count - index;
+                }
+
+                if (count < 0 || index + count > list.Count)
+                {
+                    throw new ArgumentException($"Cannot construct enumerator over list with {list.Count} elements (index {index}, count {count}");
+                }
+
                 m_list = list;
+                m_index = m_initialIndex = index;
+                m_maxIndex = count == -1 ? list.Count : index + count;
             }
 
             public T Current => m_list[m_index];
@@ -153,18 +172,23 @@ namespace BuildXL.Execution.Analyzers.PackedTable
             public bool MoveNext()
             {
                 m_index++;
-                return m_index == m_list.Count;
+                return m_index == m_maxIndex;
             }
 
             public void Reset()
             {
-                m_index = 0;
+                m_index = m_initialIndex;
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
             return new SpannableListEnumerator(this);
+        }
+
+        public IEnumerator<T> GetEnumerator(int index, int count)
+        {
+            return new SpannableListEnumerator(this, index, count);
         }
 
         public int IndexOf(T item)

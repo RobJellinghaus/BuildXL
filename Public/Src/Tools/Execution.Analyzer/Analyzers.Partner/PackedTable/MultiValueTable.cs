@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace BuildXL.Execution.Analyzers.PackedTable
 {
@@ -169,7 +171,7 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                 int lastOffsetValue = 0;
                 if (Offsets.Count > 0)
                 {
-                    lastOffsetValue = Offsets[Offsets.Count - 1];
+                    lastOffsetValue = Offsets[^1];
                 }
                 Offsets.Fill(BaseTableOpt.Count - Count, lastOffsetValue);
             }
@@ -182,5 +184,32 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// FOR UNIT TESTING ONLY! Will OOM your machine if you call this on a really large table.
         /// </remarks>
         public string ToFullString() => $"SingleValues {SingleValues.ToFullString()}, m_offsets {Offsets.ToFullString()}, m_multiValues {MultiValues.ToFullString()}";
+
+        private class MultiValueEnumerable : IEnumerable<TValue>
+        {
+            private MultiValueTable<TId, TValue> m_table;
+            private readonly int m_offset, m_count;
+            public MultiValueEnumerable(MultiValueTable<TId, TValue> table, int offset, int count)
+            {
+                m_table = table;
+                m_offset = offset;
+                m_count = count;
+            }
+            public IEnumerator<TValue> GetEnumerator()
+            {
+                return m_table.MultiValues.GetEnumerator(m_offset, m_count);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        public IEnumerable<TValue> Enumerate(TId id)
+        {
+            int index = id.FromId() - 1;
+            return new MultiValueEnumerable(this, Offsets[index], SingleValues[index]);
+        }
     }
 }

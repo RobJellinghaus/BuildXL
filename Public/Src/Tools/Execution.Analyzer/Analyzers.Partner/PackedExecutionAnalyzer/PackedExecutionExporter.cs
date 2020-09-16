@@ -373,6 +373,8 @@ namespace BuildXL.Execution.Analyzer
             // BXL: isn't it necessary to Complete() all WorkerAnalyzers before starting to iterate over their process pip information?
             // How else can that result be synchronized?
             int totalProcessPips = 0;
+            int totalDeclaredInputFiles = 0, totalDeclaredInputDirectories = 0, totalConsumedFiles = 0;
+
             foreach (var worker in m_workerAnalyzers)
             {
                 Console.WriteLine($"Completing worker {worker.Name}");
@@ -385,16 +387,21 @@ namespace BuildXL.Execution.Analyzer
                     {
                         m_packedExecutionBuilder.DeclaredInputFilesBuilder.Add(processPipInfo.PipId, m_pathsToFiles[declaredInputFilePath].fileId);
                     }
+                    totalDeclaredInputFiles += processPipInfo.DeclaredInputFiles.Count;
 
                     foreach (DirectoryArtifact directoryArtifact in processPipInfo.DeclaredInputDirectories)
                     {
                         m_packedExecutionBuilder.DeclaredInputDirectoriesBuilder.Add(processPipInfo.PipId, m_pathsToDirectories[directoryArtifact.Path].directoryId);
                     }
+                    totalDeclaredInputDirectories += processPipInfo.DeclaredInputDirectories.Count;
 
                     foreach (AbsolutePath consumedInputPath in processPipInfo.ConsumedFiles)
                     {
                         m_packedExecutionBuilder.ConsumedFilesBuilder.Add(processPipInfo.PipId, m_pathsToFiles[consumedInputPath].fileId);
                     }
+                    totalConsumedFiles += processPipInfo.ConsumedFiles.Count;
+
+                    m_packedExecution.PipExecutionTable[processPipInfo.PipId] = new PipExecutionEntry(processPipInfo.Worker);
 
                     totalProcessPips++;
                 }
@@ -404,7 +411,7 @@ namespace BuildXL.Execution.Analyzer
             m_packedExecutionBuilder.DeclaredInputDirectoriesBuilder.Complete();
             m_packedExecutionBuilder.ConsumedFilesBuilder.Complete();
 
-            Console.WriteLine($"PackedExecutionExporter: Analyzed {totalProcessPips} executed process pips at {DateTime.Now}.");
+            Console.WriteLine($"PackedExecutionExporter: Analyzed {totalProcessPips} executed process pips ({totalDeclaredInputFiles} declared input files, {totalDeclaredInputDirectories} declared input directories, {totalConsumedFiles} consumed files) at {DateTime.Now}.");
         }
 
         private void BuildFileProducers()
