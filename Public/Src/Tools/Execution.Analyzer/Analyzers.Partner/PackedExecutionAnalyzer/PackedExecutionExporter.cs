@@ -125,6 +125,11 @@ namespace BuildXL.Execution.Analyzer
         private int m_processedPipCount;
 
         /// <summary>
+        /// Count of processed files.
+        /// </summary>
+        private int m_processedFileCount;
+
+        /// <summary>
         /// The list of WorkerAnalyzer instances which consume per-worker data.
         /// </summary>
         private readonly List<WorkerAnalyzer> m_workerAnalyzers = new List<WorkerAnalyzer>();
@@ -161,6 +166,11 @@ namespace BuildXL.Execution.Analyzer
         {
             if (data.FileArtifact.IsOutputFile && data.FileContentInfo.HasKnownLength)
             {
+                if (((++m_processedFileCount) % 100000) == 0)
+                {
+                    Console.WriteLine($"Processed {m_processedFileCount} files...");
+                }
+
                 ContentFlags contentFlags = default;
                 switch (data.OutputOrigin)
                 {
@@ -176,8 +186,9 @@ namespace BuildXL.Execution.Analyzer
                 }
 
                 // TODO: evaluate optimizing this with a direct hierarchical BXL-Path-to-PackedTable-Name mapping
+                string pathString = data.FileArtifact.Path.ToString(PathTable).ToCanonicalizedPath();
                 FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(
-                    data.FileArtifact.Path.ToString(PathTable).ToCanonicalizedPath(),
+                    pathString,
                     data.FileContentInfo.Length, 
                     default,
                     contentFlags);
@@ -196,7 +207,7 @@ namespace BuildXL.Execution.Analyzer
         {
             if (data.Kind == FingerprintComputationKind.Execution)
             {
-                if ((Interlocked.Increment(ref m_processedPipCount) % 1000) == 0)
+                if (((++m_processedPipCount) % 1000) == 0)
                 {
                     Console.WriteLine($"Processed {m_processedPipCount} pips...");
                 }
@@ -364,7 +375,7 @@ namespace BuildXL.Execution.Analyzer
             int totalProcessPips = 0;
             foreach (var worker in m_workerAnalyzers)
             {
-                Console.WriteLine($"Completing {worker.Name}");
+                Console.WriteLine($"Completing worker {worker.Name}");
                 worker.Complete();
 
                 // TODO: determine whether these m_pathsToWherever lookups are doomed -- do we have to create new files/directories here?
@@ -553,12 +564,10 @@ namespace BuildXL.Execution.Analyzer
                 var consumedPaths = data.StrongFingerprintComputations.Count == 0
                     ? new List<AbsolutePath>()
                     : data.StrongFingerprintComputations[0].ObservedInputs
-                    .Where(input => input.Type == ObservedInputType.FileContentRead || input.Type == ObservedInputType.ExistingFileProbe)
-                    // filter out source files
-                    // TODO: determine whether this lookup is doomed -- do we need to create file IDs on the fly here?
-                    .Where(input => fileTable[pathsToFiles[input.Path].fileId].SizeInBytes > 0)
-                    .Select(input => input.Path)
-                    .ToList();
+                        .Where(input => input.Type == ObservedInputType.FileContentRead || input.Type == ObservedInputType.ExistingFileProbe)
+                        .Select(input => input.Path)
+                        .Where(path => pathsToFiles.TryGetValue(path, out var tuple) && fileTable[tuple.fileId].SizeInBytes > 0)
+                        .ToList();
 
                 P_PipId packedPipId = new P_PipId((int)data.PipId.Value);
                 ProcessPipInfoList.Add(new ProcessPipInfo(packedPipId, declaredInputFiles, declaredInputDirs, consumedPaths, m_workerId));

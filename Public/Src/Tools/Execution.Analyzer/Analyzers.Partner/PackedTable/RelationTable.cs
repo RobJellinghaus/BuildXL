@@ -191,16 +191,26 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                         break;
                     }
 
-                    // Count up how many are for this ID.
+                    // Count up how many are for id.
                     int count = 0;
                     buffer.Clear();
+                    
+                    // create a to-ID that will never equal any other ID (even default)
+                    TToId lastToId = default(TToId).ToId(-1);
+
                     while (listIndex + count < m_list.Count)
                     {
                         var value = m_list[listIndex + count];
                         if (value.fromId.Equals(id))
                         {
-                            buffer.Add(value.toId);
+                            // drop duplicates (silently...)
+                            // TODO: are duplicates here a logic bug? Because they do happen in practice.
+                            if (!value.toId.Equals(lastToId))
+                            {
+                                buffer.Add(value.toId);
+                            }
                             count++;
+                            lastToId = value.toId;
                             continue;
                         }
                         // ok we're done
