@@ -185,31 +185,11 @@ namespace BuildXL.Execution.Analyzers.PackedTable
         /// </remarks>
         public string ToFullString() => $"SingleValues {SingleValues.ToFullString()}, m_offsets {Offsets.ToFullString()}, m_multiValues {MultiValues.ToFullString()}";
 
-        private class MultiValueEnumerable : IEnumerable<TValue>
-        {
-            private MultiValueTable<TId, TValue> m_table;
-            private readonly int m_offset, m_count;
-            public MultiValueEnumerable(MultiValueTable<TId, TValue> table, int offset, int count)
-            {
-                m_table = table;
-                m_offset = offset;
-                m_count = count;
-            }
-            public IEnumerator<TValue> GetEnumerator()
-            {
-                return m_table.MultiValues.GetEnumerator(m_offset, m_count);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-        }
 
         public IEnumerable<TValue> Enumerate(TId id)
         {
             int index = id.FromId() - 1;
-            return new MultiValueEnumerable(this, Offsets[index], SingleValues[index]);
+            return MultiValues.Enumerate(Offsets[index], SingleValues[index]);
         }
     }
 }

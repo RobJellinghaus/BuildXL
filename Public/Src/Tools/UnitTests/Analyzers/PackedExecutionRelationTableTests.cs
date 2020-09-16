@@ -4,6 +4,7 @@
 using BuildXL.Execution.Analyzers.PackedExecution;
 using BuildXL.Execution.Analyzers.PackedTable;
 using System;
+using System.Linq;
 using Test.BuildXL.TestUtilities.Xunit;
 using Xunit;
 using Xunit.Abstractions;
@@ -115,6 +116,10 @@ namespace Test.Tool.Analyzers
             XAssert.AreArraysEqual(new[] { pipId2, pipId3 }, relationTable[pipId].ToArray(), true);
             XAssert.AreArraysEqual(new PipId[0], relationTable[pipId2].ToArray(), true);
             XAssert.AreArraysEqual(new[] { pipId, pipId2 }, relationTable[pipId3].ToArray(), true);
+
+            XAssert.AreArraysEqual(new[] { pipId2, pipId3 }, relationTable.Enumerate(pipId).ToArray(), true);
+            XAssert.AreArraysEqual(new PipId[0], relationTable.Enumerate(pipId2).ToArray(), true);
+            XAssert.AreArraysEqual(new[] { pipId, pipId2 }, relationTable.Enumerate(pipId3).ToArray(), true);
         }
     }
 }

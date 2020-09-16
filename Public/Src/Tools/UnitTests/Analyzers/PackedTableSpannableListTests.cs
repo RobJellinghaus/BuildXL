@@ -63,6 +63,10 @@ namespace Test.Tool.Analyzers
 
             list.AddRange(new[] { 3, 4, 5 }.AsSpan());
             XAssert.AreArraysEqual(new[] { 1, 2, 3, 4, 5 }, list.ToArray(), true);
+
+            XAssert.AreArraysEqual(new[] { 3, 4 }, list.Enumerate(2, 2).ToArray(), true);
+
+            XAssert.AreArraysEqual(new[] { 3, 4 }, list.AsSpan().Slice(2, 2).ToArray(), true);
         }
 
         [Fact]
