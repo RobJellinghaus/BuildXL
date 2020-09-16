@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using BuildXL.Execution.Analyzers.PackedTable;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.ContractsLight;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -80,6 +80,31 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         {
             public readonly NameTable.Builder PathTableBuilder;
 
+            /// <summary>
+            /// Function for merging two entries together to unify their content flags.
+            /// </summary>
+            private readonly Func<FileEntry, FileEntry, FileEntry> m_mergeFunc = (oldEntry, newEntry) =>
+            {
+                // Produced > MaterializedFromCache > Materialized.
+                ContentFlags oldFlags = oldEntry.ContentFlags;
+                ContentFlags newFlags = newEntry.ContentFlags;
+                bool eitherProduced = ((oldFlags & ContentFlags.Produced) != 0 || (newFlags & ContentFlags.Produced) != 0);
+                bool eitherMaterializedFromCache = ((oldFlags & ContentFlags.MaterializedFromCache) != 0 || (newFlags & ContentFlags.MaterializedFromCache) != 0);
+                bool eitherMaterialized = ((oldFlags & ContentFlags.Materialized) != 0 || (newFlags & ContentFlags.Materialized) != 0);
+
+                // System should never tell us the file was both produced and materialized from cache
+                //Contract.Assert(!(eitherProduced && eitherMaterializedFromCache));
+
+                return newEntry.WithContentFlags(
+                    eitherProduced
+                        ? ContentFlags.Produced
+                        : eitherMaterializedFromCache
+                            ? ContentFlags.MaterializedFromCache
+                            : eitherMaterialized
+                                ? ContentFlags.Materialized
+                                : default);
+            };
+
             public CachingBuilder(FileTable table, NameTable.Builder pathTableBuilder) : base(table)
             {
                 PathTableBuilder = pathTableBuilder;
@@ -100,27 +125,25 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
                     sizeInBytes,
                     producerPip,
                     contentFlags);
-                return GetOrAdd(entry, (oldEntry, newEntry) =>
-                {
-                    // Produced > MaterializedFromCache > Materialized.
-                    ContentFlags oldFlags = oldEntry.ContentFlags;
-                    ContentFlags newFlags = newEntry.ContentFlags;
-                    bool eitherProduced = ((oldFlags & ContentFlags.Produced) != 0 || (newFlags & ContentFlags.Produced) != 0);
-                    bool eitherMaterializedFromCache = ((oldFlags & ContentFlags.MaterializedFromCache) != 0 || (newFlags & ContentFlags.MaterializedFromCache) != 0);
-                    bool eitherMaterialized = ((oldFlags & ContentFlags.Materialized) != 0 || (newFlags & ContentFlags.Materialized) != 0);
+                return GetOrAdd(entry);
+            }
 
-                    // System should never tell us the file was both produced and materialized from cache
-                    Contract.Assert(!(eitherProduced && eitherMaterializedFromCache));
-
-                    return newEntry.WithContentFlags(
-                        eitherProduced
-                            ? ContentFlags.Produced
-                            : eitherMaterializedFromCache
-                                ? ContentFlags.MaterializedFromCache
-                                : eitherMaterialized
-                                    ? ContentFlags.Materialized
-                                    : default(ContentFlags));
-                });
+            /// <summary>
+            /// Get or add an entry for the given file path.
+            /// </summary>
+            /// <remarks>
+            /// If the entry already exists, the sizeInBytes value passed here will be ignored!
+            /// The only time that value can be set is when adding a new file not previously recorded.
+            /// TODO: consider failing if this happens?
+            /// </remarks>
+            public FileId UpdateOrAdd(string filePath, long sizeInBytes, PipId producerPip, ContentFlags contentFlags)
+            {
+                FileEntry entry = new FileEntry(
+                    PathTableBuilder.GetOrAdd(filePath),
+                    sizeInBytes,
+                    producerPip,
+                    contentFlags);
+                return UpdateOrAdd(entry, m_mergeFunc);
             }
         }
     }

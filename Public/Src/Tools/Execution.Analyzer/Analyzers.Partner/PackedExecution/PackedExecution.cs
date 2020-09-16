@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using BuildXL.Execution.Analyzers.PackedTable;
-using System.Diagnostics.Contracts;
 using System.IO;
-using System.Diagnostics.ContractsLight;
 
 namespace BuildXL.Execution.Analyzers.PackedExecution
 {
@@ -137,7 +135,7 @@ namespace BuildXL.Execution.Analyzers.PackedExecution
         /// </summary>
         public void ConstructRelationTables()
         {
-            System.Diagnostics.ContractsLight.Contract.Requires(ConsumedFiles == null, "Must only construct relation tables once");
+            //System.Diagnostics.ContractsLight.Contract.Requires(ConsumedFiles == null, "Must only construct relation tables once");
 
             ConsumedFiles = new RelationTable<PipId, FileId>(PipTable, FileTable);
             DeclaredInputDirectories = new RelationTable<PipId, DirectoryId>(PipTable, DirectoryTable);

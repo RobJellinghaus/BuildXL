@@ -187,7 +187,7 @@ namespace BuildXL.Execution.Analyzer
 
                 // TODO: evaluate optimizing this with a direct hierarchical BXL-Path-to-PackedTable-Name mapping
                 string pathString = data.FileArtifact.Path.ToString(PathTable).ToCanonicalizedPath();
-                FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(
+                FileId fileId = m_packedExecutionBuilder.FileTableBuilder.UpdateOrAdd(
                     pathString,
                     data.FileContentInfo.Length, 
                     default,
@@ -233,9 +233,9 @@ namespace BuildXL.Execution.Analyzer
 
                 foreach (FileArtifact fileArtifact in kvp.fileArtifactArray)
                 {
-                    // BXL: Is there an invariant that FileArtifactContentDecided will be called for a given file
-                    // before PipExecutionDirectoryOutputs will be called for the directory containing that file?
-                    // (If so, this can just be a lookup in m_pathsToFiles, instead of a GetOrAdd for a possibly new file.)
+                    // The XLG file can wind up constructing a given file instance either here or in
+                    // FileArtifactContentDecided. If it publishes it in both places, that place's entry
+                    // should win, which is why this uses GetOrAdd and the other location uses UpdateOrAdd.
                     FileId fileId = m_packedExecutionBuilder.FileTableBuilder.GetOrAdd(
                         fileArtifact.Path.ToString(PathTable).ToCanonicalizedPath(),
                         default, default, default);
@@ -313,7 +313,8 @@ namespace BuildXL.Execution.Analyzer
 
             Console.WriteLine($"PackedExecutionExporter: Added {PipGraph.PipCount} pips at {DateTime.Now}.");
 
-
+            // ensure the PipExecutionTable is ready to be pipulated (heh)
+            m_packedExecution.PipExecutionTable.FillToBaseTableCount();
 
             return pipList;
         }

@@ -80,11 +80,26 @@ namespace BuildXL.Execution.Analyzers.PackedTable
                 }
             }
 
-            public virtual TId GetOrAdd(TValue value, Func<TValue, TValue, TValue> optCombiner = null)
+            public virtual TId GetOrAdd(TValue value)
             {
                 if (Entries.TryGetValue(value, out TId id))
                 {
-                    TValue updated = optCombiner == null ? ValueTable[id] : optCombiner(ValueTable[id], value);
+                    return id;
+                }
+                else
+                {
+                    id = ValueTable.Add(value);
+                    Entries.Add(value, id);
+                    return id;
+                }
+            }
+
+            public virtual TId UpdateOrAdd(TValue value, Func<TValue, TValue, TValue> optCombiner = null)
+            {
+                if (Entries.TryGetValue(value, out TId id))
+                {
+                    // prefer new value if no combiner
+                    TValue updated = optCombiner == null ? value : optCombiner(ValueTable[id], value);
                     ValueTable[id] = updated;
                     return id;
                 }
