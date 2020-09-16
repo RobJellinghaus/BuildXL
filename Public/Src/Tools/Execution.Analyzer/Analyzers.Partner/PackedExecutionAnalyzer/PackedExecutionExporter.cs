@@ -166,7 +166,7 @@ namespace BuildXL.Execution.Analyzer
         {
             if (data.FileArtifact.IsOutputFile && data.FileContentInfo.HasKnownLength)
             {
-                if (((++m_processedFileCount) % 100000) == 0)
+                if (((++m_processedFileCount) % 1000000) == 0)
                 {
                     Console.WriteLine($"Processed {m_processedFileCount} files...");
                 }
